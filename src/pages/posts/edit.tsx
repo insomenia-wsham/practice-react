@@ -23,7 +23,7 @@ const PostEditPage = ({ f7route, f7router, setPost, setPosts }: PostEditPageProp
 
   return (
     <Page noToolbar>
-      <Navbar title="게시글 수정" backLink={true}></Navbar>
+      <Navbar title="게시글 수정" backLink />
 
       <p className="p-3 text-base font-bold">게시글 수정</p>
 

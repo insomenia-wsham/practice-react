@@ -48,3 +48,20 @@ export interface Post extends DefaultProps {
   content: string;
   user: User;
 }
+
+export interface ItemList {
+  item_id: number;
+  name: string;
+  list_price: number;
+  sale_price: number;
+  image_path: string;
+  item_count: number;
+}
+
+export interface Cart extends DefaultProps {
+  id: number;
+  item_id: number;
+  user_id: number;
+  item_count: number;
+  item: any[];
+}

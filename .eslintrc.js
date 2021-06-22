@@ -80,4 +80,7 @@ module.exports = {
     browser: true,
     node: true,
   },
+  parserOptions: {
+    ecmaVersion: 2018,
+  },
 };

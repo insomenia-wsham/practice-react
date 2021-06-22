@@ -10,15 +10,26 @@ import PostEditPage from '@pages/posts/edit';
 import MyPage from '@pages/mypage';
 import SignUpPage from '@pages/users/registrations/new';
 import LoginPage from '@pages/users/sessions/new';
+import UserEditPage from '@pages/users/edit';
+import CartIndexPage from '@pages/carts';
+import InterestIndexPage from '@pages/interests';
+import OrderIndexPage from '@pages/orders';
+import OrderNewPage from '@pages/orders/new';
 
 const routes = [
   { path: '/', component: HomePage },
   { path: '/users/sign_in', component: LoginPage },
   { path: '/users/sign_up', component: SignUpPage },
+  { path: '/users/:id', component: UserEditPage },
   { path: '/intro', component: IntroPage },
   { path: '/mypage', component: MyPage },
   { path: '/items', component: ItemIndexPage },
   { path: '/items/:id', component: ItemShowPage },
+  { path: '/carts', component: CartIndexPage },
+  { path: '/interests', component: InterestIndexPage },
+  { path: '/orders', component: OrderIndexPage },
+  { path: '/orders/new', component: OrderNewPage },
+
   { path: '/posts', component: PostIndexPage },
   { path: '/posts/new', component: PostNewPage },
   { path: '/posts/:id', component: PostShowPage },

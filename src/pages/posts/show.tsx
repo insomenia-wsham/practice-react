@@ -14,7 +14,7 @@ const PostShowPage = ({ f7route, f7router, setPosts }: PostShowPageProps) => {
 
   return (
     <Page noToolbar>
-      <Navbar title={post?.title} backLink={true}>
+      <Navbar title={post?.title} backLink>
         <NavRight>
           <Link
             iconF7="ellipsis"
@@ -51,7 +51,7 @@ const PostShowPage = ({ f7route, f7router, setPosts }: PostShowPageProps) => {
                 })
                 .open();
             }}
-          ></Link>
+          />
         </NavRight>
       </Navbar>
 

@@ -25,37 +25,61 @@ const CustomPanel = ({ currentUser, handleLogout, isLoggedIn }) => (
           </div>
         </a>
         <List className="mt-0">
-          <Link
+          {/* <Link
             href="/notices"
             className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
             panelClose
           >
             <i className="las la-calendar-check mr-4" style={{ fontSize: '28px', color: '#374151' }} />
             공지사항
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             href="/faqs"
             className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
             panelClose
           >
             <i className="las la-question-circle mr-4" style={{ fontSize: '28px', color: '#374151' }} />
             FAQ
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             href="/posts"
             className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
             panelClose
           >
             <i className="las la-edit mr-4" style={{ fontSize: '28px', color: '#374151' }} />
             게시글
+          </Link> */}
+          <Link
+            href="/items"
+            className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
+            panelClose
+          >
+            <i className="las la-list mr-4" style={{ fontSize: '28px', color: '#374151' }} />
+            상품목록
           </Link>
           <Link
-            href="/line_items"
+            href="/interests"
+            className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
+            panelClose
+          >
+            <i className="las la-heart mr-4" style={{ fontSize: '28px', color: '#374151' }} />
+            관심목록
+          </Link>
+          <Link
+            href="/carts"
             className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
             panelClose
           >
             <i className="las la-shopping-cart mr-4" style={{ fontSize: '28px', color: '#374151' }} />
             장바구니
+          </Link>
+          <Link
+            href="/orders"
+            className="flex justify-start text-gray-900 hover:text-gray-900 hover:bg-gray-50 group px-6 py-4 text-base font-medium rounded-md"
+            panelClose
+          >
+            <i className="las la-clipboard-list mr-4" style={{ fontSize: '28px', color: '#374151' }} />
+            주문내역
           </Link>
           {isLoggedIn ? (
             <Link

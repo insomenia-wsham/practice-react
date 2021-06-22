@@ -1,10 +1,12 @@
-import { API_URL, getCategory, getItems } from '@api';
+import { API_URL, getCategory, getItems, getCarts } from '@api';
+import { useQuery } from 'react-query';
+import useAuth from '@hooks/useAuth';
 import { Item } from '@constants';
 import { currency } from '@js/utils';
 import { useFormik } from 'formik';
 import { Link, List, ListInput, ListItem, Navbar, NavRight, NavTitle, Page } from 'framework7-react';
 import { map } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import i18n from '../../assets/lang/i18n';
 
 const SortStates = [
@@ -20,56 +22,70 @@ interface ItemFilterProps {
 }
 
 const ItemIndexPage = ({ f7route }) => {
+  const { authenticateUser, currentUser } = useAuth();
+  const userId = currentUser.id;
+  const { data, status, error } = useQuery<any>('carts', getCarts(userId));
   const { is_main, category_id } = f7route.query;
   const [viewType, setViewType] = useState('grid');
-  // const queryClient = useQueryClient();
-  // const ITEM_KEY = ['items', category_id * 1];
-  // const { data: category } = useQuery<Category, Error>(
-  //   ['category', parseInt(category_id, 10)],
-  //   getCategory(category_id),
-  //   {
-  //     enabled: !!category_id,
-  //   },
-  // );
   const [category, setCategory] = useState(null);
-
-  const [items, setItems] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [itemIndex, setItemIndex] = useState(0);
+  const [itemList, setItemList] = useState([]);
+  // const [result, setResult] = useState(itemList.slice(0, 10));
+
+  // const infiniteScroll = useCallback(() => {
+  //   const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+  //   const scrollTop = Math.max(document.documentElement.scrollTop, document.body.scrollTop);
+  //   const { clientHeight } = document.documentElement;
+
+  //   if (scrollTop + clientHeight === scrollHeight) {
+  //     setItemIndex(itemIndex + 10);
+  //     setResult(result.concat(itemList.slice(itemIndex + 10, itemIndex + 20)));
+  //   }
+  // }, [itemIndex, result]);
+
   useEffect(() => {
-    // then을 사용
     if (category_id) {
       getCategory(category_id).then((resp) => {
         setCategory(resp.data);
       });
     }
-    // async await 을 사용
     (async () => {
       const { data } = await getItems();
-      setItems(data.items);
+      const { items } = data;
+      items.sort((a, b) => b.id - a.id);
+      if (category_id) {
+        const categorySortItem = items.filter((item) => item.category.id === Number(category_id));
+        setItemList(categorySortItem);
+      } else {
+        setItemList(items);
+        // setResult(items.slice(0, 10));
+      }
     })();
   }, []);
+
+  // useEffect(() => {
+  //   window.addEventListener('scroll', infiniteScroll, true);
+  //   return () => window.removeEventListener('scroll', infiniteScroll, true);
+  // }, [infiniteScroll]);
 
   const filterForm = useFormik<ItemFilterProps>({
     initialValues: {
       s: 'created_at desc',
       category_id_eq: category_id,
     },
-    onSubmit: async () => {
-      // await queryClient.removeQueries(ITEM_KEY);
-      // await refetch();
+    onSubmit: async (res) => {
+      if (res.s === 'sale_price desc') {
+        itemList.sort((a, b) => b.sale_price - a.sale_price);
+      } else if (res.s === 'sale_price asc') {
+        itemList.sort((a, b) => a.sale_price - b.sale_price);
+      } else {
+        itemList.sort((a, b) => b.id - a.id);
+      }
     },
   });
 
-  // const { data, refetch } = useQuery<Items, Error>(
-  //   ITEM_KEY,
-  //   getItems({
-  //     q: filterForm.values,
-  //   }),
-  // );
-
   const onRefresh = async (done) => {
-    // await queryClient.removeQueries(ITEM_KEY);
-    // await refetch();
     done();
   };
 
@@ -78,13 +94,13 @@ const ItemIndexPage = ({ f7route }) => {
       <Navbar backLink={!is_main}>
         <NavTitle>{(category && category.title) || '쇼핑'}</NavTitle>
         <NavRight>
-          <Link href="/line_items" iconF7="cart" iconBadge={3} badgeColor="red" />
+          <Link href="/carts" iconF7="cart" iconBadge={data ? data.total_count : 0} badgeColor="red" />
         </NavRight>
       </Navbar>
 
       <form onSubmit={filterForm.handleSubmit} className="item-list-form p-3 table w-full border-b">
         <div className="float-left">
-          총 <b>{currency((items && totalCount) || 0)}</b>개 상품
+          총 <b>{currency((itemList && itemList.length) || 0)}</b>개 상품
         </div>
         <ListInput
           type="select"
@@ -116,10 +132,10 @@ const ItemIndexPage = ({ f7route }) => {
         </ListInput>
       </form>
       <List noHairlines className="mt-0 text-sm font-thin ">
-        {items && (
+        {itemList && (
           <ul>
             {viewType === 'list'
-              ? items.map((item: Item, i) => (
+              ? itemList.map((item: Item, i) => (
                   <React.Fragment key={item.id}>
                     <ListItem
                       key={item.id}
@@ -133,7 +149,7 @@ const ItemIndexPage = ({ f7route }) => {
                     </ListItem>
                   </React.Fragment>
                 ))
-              : items.map((item: Item, i) => (
+              : itemList.map((item: Item, i) => (
                   <React.Fragment key={item.id}>
                     <div className="w-1/2 inline-flex grid-list-item relative">
                       <ListItem

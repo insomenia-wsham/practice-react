@@ -42,9 +42,6 @@ const MyPage = () => {
             <div className="w-full">
               <a href={`/users/${currentUser?.id}`}>
                 <h1 className="text-xl font-bold text-gray-900">{isAuthenticated ? currentUser.name : '인썸니아'}</h1>
-                <p className="mt-1 text-xs font-medium text-gray-500">
-                  팔로워 <span className=" text-gray-900">0</span> | 팔로잉 <span className=" text-gray-900">0</span>
-                </p>
               </a>
             </div>
             <a href={`/users/${currentUser?.id}`}>
@@ -54,29 +51,31 @@ const MyPage = () => {
         </div>
         <div className="py-8 grid grid-flow-col auto-cols-max grid-cols-3 gap-4 text-center">
           <div className="text-center">
-            <a href="/notifications">
-              <i className="mb-2 las la-bell" style={{ fontSize: '42px', color: 'lightgray' }} />
+            <a href="/carts">
+              <i className="mb-2 las la-shopping-cart" style={{ fontSize: '42px', color: 'lightgray' }} />
               <br />
-              <span className="text-sm text-gray-600">알림</span>
+              <span className="text-sm text-gray-600">장바구니</span>
             </a>
           </div>
           <div className="text-center">
-            <i className="mb-2 las la-file-invoice" style={{ fontSize: '42px', color: 'lightgray' }} />
-            <br />
-            <span className="text-sm text-gray-600">주문</span>
+            <a href="/orders">
+              <i className="mb-2 las la-file-invoice" style={{ fontSize: '42px', color: 'lightgray' }} />
+              <br />
+              <span className="text-sm text-gray-600">주문</span>
+            </a>
           </div>
           <div className="text-center">
-            <a href="/likes/list" className="text-sm text-gray-600">
+            <a href="/interests" className="text-sm text-gray-600">
               <i className="mb-2 lar la-heart" style={{ fontSize: '42px', color: 'lightgray' }} />
               <br />
-              좋아요{/* <span className="font-semibold text-gray-900">0</span> */}
+              관심
             </a>
           </div>
         </div>
         <div className="bg-white overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             <li>
-              <a href="#" className="block hover:bg-gray-50">
+              <a href={`/users/${currentUser?.id}`} className="block hover:bg-gray-50">
                 <div className="flex items-center px-4 py-4 sm:px-6">
                   <div className="min-w-0 flex-1 flex items-center">
                     <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
@@ -89,12 +88,12 @@ const MyPage = () => {
               </a>
             </li>
             <li>
-              <a href="#" className="block hover:bg-gray-50">
+              <a href="/orders" className="block hover:bg-gray-50">
                 <div className="flex items-center px-4 py-4 sm:px-6">
                   <div className="min-w-0 flex-1 flex items-center">
                     <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">주문/배송 조회</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">주문 목록</p>
                       </div>
                     </div>
                   </div>
@@ -102,12 +101,12 @@ const MyPage = () => {
               </a>
             </li>
             <li>
-              <a href="#" className="block hover:bg-gray-50">
+              <a href="/carts" className="block hover:bg-gray-50">
                 <div className="flex items-center px-4 py-4 sm:px-6">
                   <div className="min-w-0 flex-1 flex items-center">
                     <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">교환/환불 조회</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">장바구니 목록</p>
                       </div>
                     </div>
                   </div>
@@ -115,6 +114,19 @@ const MyPage = () => {
               </a>
             </li>
             <li>
+              <a href="/interests" className="block hover:bg-gray-50">
+                <div className="flex items-center px-4 py-4 sm:px-6">
+                  <div className="min-w-0 flex-1 flex items-center">
+                    <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 truncate">관심 목록</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </li>
+            {/* <li>
               <a href="#" className="block hover:bg-gray-50">
                 <div className="flex items-center px-4 py-4 sm:px-6">
                   <div className="min-w-0 flex-1 flex items-center">
@@ -126,33 +138,7 @@ const MyPage = () => {
                   </div>
                 </div>
               </a>
-            </li>
-            <li>
-              <a href="#" className="block hover:bg-gray-50">
-                <div className="flex items-center px-4 py-4 sm:px-6">
-                  <div className="min-w-0 flex-1 flex items-center">
-                    <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">고객센터</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li>
-              <a href="#" className="block hover:bg-gray-50">
-                <div className="flex items-center px-4 py-4 sm:px-6">
-                  <div className="min-w-0 flex-1 flex items-center">
-                    <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">신고하기</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </li>
+            </li> */}
             {isAuthenticated ? (
               <li>
                 <a href="#" onClick={logoutHandler} className="block hover:bg-gray-50">

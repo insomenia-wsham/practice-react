@@ -9,10 +9,10 @@ const PostIndexPage = ({ f7route, f7router }: PageRouteProps) => {
 
   return (
     <Page noToolbar>
-      <Navbar title="게시글 목록" backLink={true}></Navbar>
+      <Navbar title="게시글 목록" backLink />
 
       <Fab href="/posts/new" position="center-bottom" slot="fixed" text="게시글 작성" color="red">
-        <Icon ios="f7:plus" aurora="f7:plus" md="material:add"></Icon>
+        <Icon ios="f7:plus" aurora="f7:plus" md="material:add" />
       </Fab>
 
       {status === 'loading' && <div>Loading ....</div>}
@@ -25,7 +25,7 @@ const PostIndexPage = ({ f7route, f7router }: PageRouteProps) => {
               key={post.id}
               title={post.title}
               after={post.user.email.split('@')[0]}
-            ></ListItem>
+            />
           ))}
         </List>
       )}
