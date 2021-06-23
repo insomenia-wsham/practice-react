@@ -1,17 +1,25 @@
-import { API_URL, createCart, getItem, createInterest } from '@api';
+import { API_URL, createCart, getItem, createInterest, getReviews, createReview } from '@api';
 import { PageRouteProps } from '@constants';
 import { Link, f7, Navbar, Page, Swiper, SwiperSlide, Block, Row, Col, Button } from 'framework7-react';
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import useAuth from '@hooks/useAuth';
+import moment from 'moment';
 
 const ItemShowPage = ({ f7route }: PageRouteProps) => {
   const { authenticateUser, currentUser } = useAuth();
   const userId = currentUser.id;
   const itemId = f7route.params.id;
   const { data: item, status, error } = useQuery<any>(`items-${itemId}`, getItem(itemId));
+  const {
+    data: reviews,
+    status: reviewsStatus,
+    error: reviewsError,
+  } = useQuery<any>(`reviews-${itemId}`, getReviews(itemId));
   const [itemCount, setItemCount] = useState(0);
+  const [reviewContent, setReviewContent] = useState('');
   const createCartMutation = useMutation(createCart());
+  const createReviewMutation = useMutation(createReview());
   const queryClient = useQueryClient();
   const salePercent = (list_price, sale_price) => {
     const saleValue = list_price - sale_price;
@@ -27,6 +35,10 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
   const increaseClick = () => {
     const increaseCount = itemCount + 1;
     setItemCount(increaseCount);
+  };
+
+  const onChageReviewContent = (e) => {
+    setReviewContent(e.target.value);
   };
 
   const cartCreateAPI = async () => {
@@ -46,7 +58,7 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
   };
 
   const interestCreateAPI = async () => {
-    await createInterest(userId, { user_id: userId, item_id: Number(itemId) }, (data) => {
+    await createInterest({ user_id: userId, item_id: Number(itemId) }, (data) => {
       f7.dialog.alert(data.message);
     });
   };
@@ -144,6 +156,59 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
             </Row>
           </Block>
         </div>
+      </div>
+      <div className="px-1 mt-4">
+        <div className="mb-10 px-4 py-4 bg-gray-50 rounded">
+          <b>리뷰작성</b>
+          <div className="mt-2">
+            <textarea
+              className="inline-block p-2 w-2/3 h-28 bg-white"
+              onChange={onChageReviewContent}
+              value={reviewContent}
+            />
+            <input
+              type="button"
+              className="inline-block w-1/4 h-28 float-right rounded-lg bg-gray-100"
+              value="등록"
+              onClick={() =>
+                createReviewMutation.mutate(
+                  { user_id: userId, item_id: itemId, content: reviewContent },
+                  {
+                    onSuccess: () => {
+                      f7.dialog.alert('성공적으로 리뷰가 작성되었습니다. ');
+                      queryClient.invalidateQueries(`reviews-${itemId}`);
+                      setReviewContent('');
+                    },
+                  },
+                )
+              }
+            />
+          </div>
+        </div>
+        {reviews ? (
+          <div>
+            <div className="py-4 pl-4 border-t border-b bg-gray-50">
+              <p>{`총 댓글(${reviews.total_count})`}</p>
+            </div>
+            <ul className="list-none">
+              {reviews.reviews.map((review) => (
+                <li className="p-4 border-b">
+                  <div className="mb-4">
+                    <span>
+                      <b>{review.user.name}</b>
+                    </span>
+                    <span className="ml-4 text-xs text-gray-400">
+                      {moment(review.create_at).format('YYYY-MM-DD HH:MM:SS')}
+                    </span>
+                  </div>
+                  <div>
+                    <span>{review.content}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
     </Page>
   );

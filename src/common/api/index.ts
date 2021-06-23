@@ -19,7 +19,7 @@ export const signupAPI = (params: any) => PlainAPI.post('/signup', { user: param
 export const logoutAPI = () => API.delete('/logout');
 
 export const getUser = (userId, params = null) => API.get(`users/${userId}`, { params });
-export const updateUser = (userId, params = null) => API.put(`users/${userId}`, { user: params });
+export const updateUser = (userId, params = null) => API.put(`/users/${userId}`, { user: params });
 // export const updatePassword = (userId, params = null) => API.put(`user/${userId}`, { user: params });
 
 // 상품목록 조회
@@ -50,57 +50,69 @@ export const updatePost = (postId, params) => API.patch(`/posts/${postId}`, { po
 export const destroyPost = (postId) => API.delete(`/posts/${postId}`);
 
 // 장바구니 목록 조회
-export const getCarts = (userId) => async () => {
-  const { data } = await API.get(`users/${userId}/carts`);
+export const getCarts = () => async () => {
+  const { data } = await API.get(`/carts`);
   return data;
 };
 
 // 장바구니 등록
 export const createCart = () => async (params) => {
-  const { data } = await API.post(`/users/${params.user_id}/carts`, { cart: params });
+  const { data } = await API.post(`/carts`, { cart: params });
   return data;
 };
 
 // 장바구니 상품 삭제
 export const deleteCartItem = () => async (params) => {
-  const { data } = await API.delete(`/users/${params.userId}/carts/${params.id}`);
+  const { data } = await API.delete(`/carts/${params.id}`);
   return data;
 };
 
 // 장바구니 수량 수정
 export const updateCartItem = () => async (params) => {
-  const { data } = await API.patch(`/users/${params.user_id}/carts/${params.id}`, { cart: params });
+  const { data } = await API.patch(`/carts/${params.id}`, { cart: params });
   return data;
 };
 
 // 관심목록 조회
-export const getInterestList = (userId) => async () => {
-  const { data } = await API.get(`users/${userId}/interests`);
+export const getInterestList = () => async () => {
+  const { data } = await API.get(`/interests`);
   return data;
 };
 
 // 관심상품 등록
-export const createInterest = async (userId, params, callback) => {
-  const { data } = await API.post(`/users/${userId}/interests`, { interest: params });
+export const createInterest = async (params, callback) => {
+  const { data } = await API.post(`/interests`, { interest: params });
   callback(data);
   return data;
 };
 
 // 관심상품 삭제
 export const deleteInterestItem = () => async (params) => {
-  const { data } = await API.delete(`/users/${params.userId}/interests/${params.id}`);
+  const { data } = await API.delete(`/interests/${params.id}`);
   return data;
 };
 
 // 주문목록 조회
-export const getOrders = (userId) => async () => {
-  const { data } = await API.get(`users/${userId}/orders`);
+export const getOrders = () => async () => {
+  const { data } = await API.get(`/orders`);
   return data;
 };
 
 // 주문 등록
 export const createOrder = async (params) => {
-  const { data } = await API.post(`/users/${params.user_id}/orders`, { order: params });
+  const { data } = await API.post(`/orders`, { order: params });
+  return data;
+};
+
+// 리뷰 관련 API
+export const getReviews = (itemId) => async () => {
+  const { data } = await API.get(`/items/${itemId}/reviews`);
+  return data;
+};
+
+// 리뷰 등록
+export const createReview = () => async (params) => {
+  const { data } = await API.post(`/items/${params.item_id}/reviews`, { review: params });
   return data;
 };
 

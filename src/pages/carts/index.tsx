@@ -1,17 +1,13 @@
-import { getCarts, deleteCartItem, updateCartItem } from '@api';
-import { f7, Navbar, Page, List, ListItem, Button, Block, Row, Col, Link } from 'framework7-react';
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import useAuth from '@hooks/useAuth';
+import { getCarts, deleteCartItem, updateCartItem } from '@api';
+import { f7, Navbar, Page, List, ListItem, Button, Block, Row, Col, Link } from 'framework7-react';
 import { configs } from '@config';
 import LandingPage from '@pages/landing';
 
 const CartIndexPage = () => {
   const { API_URL } = configs;
-
-  const { currentUser } = useAuth();
-  const userId = currentUser.id;
-  const { data, status, error } = useQuery<any>('carts', getCarts(userId));
+  const { data, status, error } = useQuery<any>('carts', getCarts());
   const deleteCartMutation = useMutation(deleteCartItem());
   const updateCartMutation = useMutation(updateCartItem());
   const queryClient = useQueryClient();
@@ -20,7 +16,7 @@ const CartIndexPage = () => {
     if (item_count > 1) {
       const decreaseCount = item_count - 1;
       updateCartMutation.mutate(
-        { user_id: userId, id, item_count: decreaseCount },
+        { id, item_count: decreaseCount },
         {
           onSuccess: () => {
             queryClient.invalidateQueries('carts');
@@ -35,7 +31,7 @@ const CartIndexPage = () => {
   const increaseClick = (id, item_count) => {
     const decreaseCount = item_count + 1;
     updateCartMutation.mutate(
-      { user_id: userId, id, item_count: decreaseCount },
+      { id, item_count: decreaseCount },
       {
         onSuccess: () => {
           queryClient.invalidateQueries('carts');
@@ -85,7 +81,6 @@ const CartIndexPage = () => {
                 onClick={() =>
                   deleteCartMutation.mutate(
                     {
-                      userId,
                       id: cart.id,
                     },
                     {

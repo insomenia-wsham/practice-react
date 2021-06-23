@@ -1,7 +1,7 @@
+import React from 'react';
 import { getCarts, createOrder } from '@api';
 import { f7, Navbar, Page, List, ListInput, Button, Link } from 'framework7-react';
-import React from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import useAuth from '@hooks/useAuth';
 
 interface ReceiverInfo {
@@ -20,7 +20,7 @@ const OrderNewPage = () => {
     receiver_address_detail: '',
     receiver_name: '',
   });
-  const { data, status, error, refetch } = useQuery<any>('carts', getCarts(userId));
+  const { data, status, error, refetch } = useQuery<any>('carts', getCarts());
   const queryClient = useQueryClient();
   const createOrderAPI = async () => {
     createOrder({

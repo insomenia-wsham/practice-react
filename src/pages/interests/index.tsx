@@ -11,7 +11,7 @@ const InterestIndexPage = () => {
 
   const { authenticateUser, currentUser } = useAuth();
   const userId = currentUser.id;
-  const { data, status, error } = useQuery<any>('interest', getInterestList(userId));
+  const { data, status, error } = useQuery<any>('interest', getInterestList());
   const deleteInterestMutation = useMutation(deleteInterestItem());
   const queryClient = useQueryClient();
 

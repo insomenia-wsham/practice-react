@@ -23,8 +23,7 @@ interface ItemFilterProps {
 
 const ItemIndexPage = ({ f7route }) => {
   const { authenticateUser, currentUser } = useAuth();
-  const userId = currentUser.id;
-  const { data, status, error } = useQuery<any>('carts', getCarts(userId));
+  const { data, status, error } = useQuery<any>('carts', getCarts());
   const { is_main, category_id } = f7route.query;
   const [viewType, setViewType] = useState('grid');
   const [category, setCategory] = useState(null);

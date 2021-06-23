@@ -1,10 +1,11 @@
-import { getUser, updateUser } from '@api';
+import { updateUser } from '@api';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { sleep } from '@utils';
 import { f7, Navbar, Page, List, ListInput, Button, Block, Row, Col } from 'framework7-react';
 import React, { useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
 import useAuth from '@hooks/useAuth';
+import { destroyToken, getToken } from '@store';
 
 interface FormValues {
   name: string;
@@ -54,12 +55,13 @@ const UserEditPage = ({ f7route }) => {
           f7.dialog.preloader('잠시만 기다려주세요...');
           try {
             const { data } = await updateUser(userId, { ...values });
-            authenticateUser(data);
+            authenticateUser(getToken());
           } catch (e) {
             throw new Error(e);
           } finally {
             setSubmitting(false);
             f7.dialog.close();
+            f7.dialog.alert('수정이 완료되었습니다.');
           }
         }}
         validateOnMount

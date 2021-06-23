@@ -26,3 +26,5 @@ const useAuth = () => {
 };
 
 export default useAuth;
+
+// setCurrentUser({ token, csrf, currentUser: user });

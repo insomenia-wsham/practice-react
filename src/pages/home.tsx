@@ -10,8 +10,7 @@ import img3 from '../assets/images/6.png';
 
 const HomePage = () => {
   const { authenticateUser, currentUser } = useAuth();
-  const userId = currentUser.id;
-  const { data, status, error } = useQuery<any>('carts', getCarts(userId));
+  const { data, status, error } = useQuery<any>('carts', getCarts());
   return (
     <Page name="home">
       <Navbar>
@@ -20,7 +19,7 @@ const HomePage = () => {
         </NavLeft>
         <NavTitle>인썸니아</NavTitle>
         <NavRight>
-          <Link href="/carts" iconF7="cart" iconBadge={data ? data.total_count : 0} badgeColor="red" />
+          <Link href="/carts" iconF7="cart" badgeColor="red" />
         </NavRight>
       </Navbar>
       <div
