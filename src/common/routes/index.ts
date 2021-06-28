@@ -29,6 +29,7 @@ const routes = [
   { path: '/interests', component: InterestIndexPage },
   { path: '/orders', component: OrderIndexPage },
   { path: '/orders/new', component: OrderNewPage },
+  { path: '/orders/new/:itemId/:itemCount/:salePrice', component: OrderNewPage },
 
   { path: '/posts', component: PostIndexPage },
   { path: '/posts/new', component: PostNewPage },

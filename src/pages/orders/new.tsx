@@ -1,8 +1,12 @@
 import React from 'react';
 import { getCarts, createOrder } from '@api';
-import { f7, Navbar, Page, List, ListInput, Button, Link } from 'framework7-react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { Form, Formik, FormikHelpers } from 'formik';
+import { f7, Navbar, Page, List, ListInput, Button } from 'framework7-react';
+import { useQuery, useQueryClient } from 'react-query';
 import useAuth from '@hooks/useAuth';
+import * as Yup from 'yup';
+import { sleep } from '@utils';
+import LandingPage from '@pages/landing';
 
 interface ReceiverInfo {
   receiver_zipcode: string;
@@ -11,100 +15,122 @@ interface ReceiverInfo {
   receiver_name: string;
 }
 
-const OrderNewPage = () => {
+const initialValues: ReceiverInfo = {
+  receiver_zipcode: '',
+  receiver_address: '',
+  receiver_address_detail: '',
+  receiver_name: '',
+};
+
+const OrderCreateSchema = Yup.object().shape({
+  receiver_name: Yup.string().required('필수 입력사항 입니다.'),
+  receiver_address: Yup.string().required('필수 입력사항 입니다.'),
+  receiver_address_detail: Yup.string().required('필수 입력사항 입니다.'),
+  receiver_zipcode: Yup.string().required('필수 입력사항 입니다.'),
+});
+
+const OrderNewPage = ({ f7route, f7router }) => {
   const { currentUser } = useAuth();
-  const userId: string = currentUser.id;
-  const [receiverInfo, setReceiverInfo] = React.useState<ReceiverInfo>({
-    receiver_zipcode: '',
-    receiver_address: '',
-    receiver_address_detail: '',
-    receiver_name: '',
-  });
+  const userId: number = currentUser.id;
   const { data, status, error, refetch } = useQuery<any>('carts', getCarts());
   const queryClient = useQueryClient();
-  const createOrderAPI = async () => {
-    createOrder({
-      user_id: userId,
-      item_list: data.carts,
-      receiver_zipcode: receiverInfo.receiver_zipcode,
-      receiver_address: receiverInfo.receiver_address,
-      receiver_address_detail: receiverInfo.receiver_address_detail,
-      receiver_name: receiverInfo.receiver_name,
-    });
-    await queryClient.removeQueries('carts');
-    await refetch();
-    f7.dialog.alert('결재가 완료되었습니다.');
-  };
-
-  const onChangeReceiverInfo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    switch (e.target.name) {
-      case 'name':
-        setReceiverInfo({
-          ...receiverInfo,
-          receiver_name: e.target.value,
-        });
-        break;
-      case 'address':
-        setReceiverInfo({
-          ...receiverInfo,
-          receiver_address: e.target.value,
-        });
-        break;
-      case 'addressDetail':
-        setReceiverInfo({
-          ...receiverInfo,
-          receiver_address_detail: e.target.value,
-        });
-        break;
-      case 'zipcode':
-        setReceiverInfo({
-          ...receiverInfo,
-          receiver_zipcode: e.target.value,
-        });
-        break;
-    }
-  };
 
   return (
     <Page noToolbar>
       <Navbar title="주문서 작성하기" backLink />
-      <List noHairlinesMd>
-        <ListInput
-          label="수령자"
-          type="text"
-          name="name"
-          placeholder="수령자 이름을 입력해주세요."
-          clearButton
-          onChange={onChangeReceiverInfo}
-        />
-        <ListInput
-          label="배송주소"
-          type="text"
-          name="address"
-          placeholder="배송지 주소를 입력해주세요."
-          clearButton
-          onChange={onChangeReceiverInfo}
-        />
-        <ListInput
-          label="상세주소"
-          type="text"
-          name="addressDetail"
-          placeholder="상세주소를 입력해주세요."
-          clearButton
-          onChange={onChangeReceiverInfo}
-        />
-        <ListInput
-          label="우편번호"
-          type="text"
-          name="zipcode"
-          placeholder="우편번호를 입력해주세요."
-          clearButton
-          onChange={onChangeReceiverInfo}
-        />
-        <Button fill onClick={createOrderAPI}>
-          <Link href="/">결재하기</Link>
-        </Button>
-      </List>
+
+      {status === 'loading' && <LandingPage />}
+      {status === 'error' && <div>{error}</div>}
+      {data && (
+        <Formik
+          initialValues={initialValues}
+          validationSchema={OrderCreateSchema}
+          onSubmit={async (values, { setSubmitting }: FormikHelpers<ReceiverInfo>) => {
+            await sleep(400);
+            f7.dialog.preloader('잠시만 기다려주세요...');
+            try {
+              if (data.carts.length > 0 || f7route.params.itemId) {
+                await createOrder({
+                  ...values,
+                  user_id: userId,
+                  item_list: f7route.params.itemId
+                    ? [
+                        {
+                          item_id: f7route.params.itemId,
+                          item_count: f7route.params.itemCount,
+                          item: { sale_price: f7route.params.salePrice },
+                        },
+                      ]
+                    : data.carts,
+                });
+              } else {
+                f7.dialog.alert('선택된 상품이 없습니다. 처음부터 다시 이용해주세요.');
+                f7router.back();
+              }
+              await queryClient.removeQueries('carts');
+              await refetch();
+            } catch (e) {
+              throw new Error(e);
+            } finally {
+              setSubmitting(false);
+              f7.dialog.close();
+              f7.dialog.alert('주문이 완료되었습니다.');
+              f7router.navigate(`/`);
+            }
+          }}
+          validateOnMount
+        >
+          {({ handleChange, handleBlur, values, errors, touched, isSubmitting, isValid }) => (
+            <Form>
+              <List noHairlinesMd className="px-6">
+                <ListInput
+                  label="수령자"
+                  type="text"
+                  name="receiver_name"
+                  placeholder="수령자 이름을 입력해주세요."
+                  clearButton
+                  value={values.receiver_name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+                <ListInput
+                  label="배송주소"
+                  type="text"
+                  name="receiver_address"
+                  placeholder="배송지 주소를 입력해주세요."
+                  clearButton
+                  value={values.receiver_address}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+                <ListInput
+                  label="상세주소"
+                  type="text"
+                  name="receiver_address_detail"
+                  placeholder="상세주소를 입력해주세요."
+                  clearButton
+                  value={values.receiver_address_detail}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+                <ListInput
+                  label="우편번호"
+                  type="text"
+                  name="receiver_zipcode"
+                  placeholder="우편번호를 입력해주세요."
+                  clearButton
+                  value={values.receiver_zipcode}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+                <Button fill className="mt-10" type="submit" disabled={isSubmitting || !isValid}>
+                  결제하기
+                </Button>
+              </List>
+            </Form>
+          )}
+        </Formik>
+      )}
     </Page>
   );
 };

@@ -2,15 +2,12 @@ import { getInterestList, deleteInterestItem } from '@api';
 import { f7, Navbar, Page, List, ListItem, Button, Block, Link, Segmented } from 'framework7-react';
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import useAuth from '@hooks/useAuth';
 import { configs } from '@config';
 import LandingPage from '@pages/landing';
 
 const InterestIndexPage = () => {
   const { API_URL } = configs;
 
-  const { authenticateUser, currentUser } = useAuth();
-  const userId = currentUser.id;
   const { data, status, error } = useQuery<any>('interest', getInterestList());
   const deleteInterestMutation = useMutation(deleteInterestItem());
   const queryClient = useQueryClient();
@@ -22,24 +19,23 @@ const InterestIndexPage = () => {
       {status === 'loading' && <LandingPage />}
       {status === 'error' && <div>{error}</div>}
 
-      {data && (
+      {data && data.interests.length > 0 ? (
         <List mediaList>
           {data.interests.map((interest) => (
             <ListItem
               key={interest.id}
               title={interest.item.name}
-              after={`${interest.item.sale_price} 원`}
+              after={`${interest.item.sale_price.toLocaleString()} 원`}
               text={interest.item.description}
             >
               <img slot="media" src={API_URL + interest.item.image_path} width="80" />
-              <Block strong>
+              <Block strong className="mt-6">
                 <Segmented raised tag="p">
                   <Button
                     fill
                     onClick={() =>
                       deleteInterestMutation.mutate(
                         {
-                          userId,
                           id: interest.id,
                         },
                         {
@@ -61,6 +57,12 @@ const InterestIndexPage = () => {
             </ListItem>
           ))}
         </List>
+      ) : (
+        <div className="pt-48">
+          <p className="text-center">
+            <b>관심목록이 비어있습니다.</b>
+          </p>
+        </div>
       )}
     </Page>
   );

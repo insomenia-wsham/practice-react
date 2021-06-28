@@ -1,20 +1,6 @@
 import { API_URL, createCart, getItem, createInterest, getReviews, createReview, deleteReview } from '@api';
 import { PageRouteProps } from '@constants';
-import {
-  f7,
-  Navbar,
-  Page,
-  Swiper,
-  SwiperSlide,
-  Block,
-  Row,
-  Col,
-  Button,
-  Link,
-  Stepper,
-  List,
-  ListInput,
-} from 'framework7-react';
+import { f7, Navbar, Page, Block, Row, Col, Button, Link, Stepper } from 'framework7-react';
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import useAuth from '@hooks/useAuth';
