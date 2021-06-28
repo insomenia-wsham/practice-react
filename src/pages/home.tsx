@@ -1,25 +1,31 @@
 import Categories from '@components/Categories';
 import { Link, Navbar, NavLeft, NavRight, NavTitle, Page, Swiper, SwiperSlide } from 'framework7-react';
-import React from 'react';
-import { useQuery } from 'react-query';
+import React, { useEffect } from 'react';
+import useUser from '@hooks/useUser';
 import useAuth from '@hooks/useAuth';
-import { getCarts } from '@api';
 import img1 from '../assets/images/4.png';
 import img2 from '../assets/images/5.png';
 import img3 from '../assets/images/6.png';
 
 const HomePage = () => {
-  const { authenticateUser, currentUser } = useAuth();
-  const { data, status, error } = useQuery<any>('carts', getCarts());
+  const { handleUpdateUser } = useUser();
+  const { currentUser } = useAuth();
+  const { id, email, name } = currentUser;
+
+  useEffect(() => {
+    handleUpdateUser({ id, email, name });
+  }, []);
+
   return (
     <Page name="home">
       <Navbar>
         <NavLeft>
           <Link icon="las la-bars" panelOpen="left" />
         </NavLeft>
-        <NavTitle>인썸니아</NavTitle>
+        <NavTitle>Insomenia</NavTitle>
         <NavRight>
-          <Link href="/carts" iconF7="cart" badgeColor="red" />
+          {/* <Link href="/carts" iconF7="cart" badgeColor="red" /> */}
+          <Link href="/carts" iconF7="search" badgeColor="red" />
         </NavRight>
       </Navbar>
       <div

@@ -3,7 +3,7 @@ import { sampleSize, zip } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import sanitizeHtml from '../js/utils/sanitizeHtml';
 
-const IntroPage = (props) => {
+const IntroPage = () => {
   const [slides, setSlides] = useState([]);
   const images: string[] = [
     'couple',

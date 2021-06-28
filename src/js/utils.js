@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { isString, map } from 'lodash'
+import { isString, map } from 'lodash';
 
 export const currency = (data, options) => {
   if (!data) return '';
@@ -64,13 +64,11 @@ export const toast = (() => {
   };
 })();
 
-export const objectsSkeletonPlaceholder = (size) => {
-  return {
-    objects: new Array(size).fill({}),
-    total_pages: 0,
-    total_count: 0
-  }
-}
+export const objectsSkeletonPlaceholder = (size) => ({
+  objects: new Array(size).fill({}),
+  total_pages: 0,
+  total_count: 0,
+});
 
 export const simpleFormat = (text, options) => {
   try {

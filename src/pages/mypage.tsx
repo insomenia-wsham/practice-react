@@ -1,10 +1,12 @@
 import { API_URL, logoutAPI } from '@api';
 import useAuth from '@hooks/useAuth';
+import useUser from '@hooks/useUser';
 import { Navbar, NavTitle, Page } from 'framework7-react';
 import React, { useCallback } from 'react';
 
 const MyPage = () => {
   const { currentUser, isAuthenticated, unAuthenticateUser } = useAuth();
+  const { currentUserInfo } = useUser();
 
   const logoutHandler = useCallback(async () => {
     try {
@@ -41,7 +43,9 @@ const MyPage = () => {
             </div>
             <div className="w-full">
               <a href={`/users/${currentUser?.id}`}>
-                <h1 className="text-xl font-bold text-gray-900">{isAuthenticated ? currentUser.name : '인썸니아'}</h1>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {isAuthenticated ? currentUserInfo.name : 'Insomenia'}
+                </h1>
               </a>
             </div>
             <a href={`/users/${currentUser?.id}`}>

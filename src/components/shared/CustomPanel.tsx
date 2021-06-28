@@ -13,7 +13,7 @@ const CustomPanel = ({ currentUser, handleLogout, isLoggedIn }) => (
             </div>
             <div className="ml-3">
               <p className="text-lg font-medium text-gray-700 group-hover:text-gray-900">
-                {isLoggedIn ? currentUser.name : '인썸니아'}
+                {isLoggedIn ? currentUser.name : 'Insomenia'}
               </p>
               <p
                 className="text-sm font-normal text-gray-500 group-hover:text-gray-700"

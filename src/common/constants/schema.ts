@@ -29,10 +29,11 @@ export interface Image extends DefaultProps {
 }
 
 export interface Item extends DefaultProps {
+  image_ids: any;
   user_id: number;
   category_id: number;
   name: string;
-  status: 'active' | 'disabled';
+  status?: 'active' | 'disabled';
   list_price: number;
   sale_price: number;
   description: string;
