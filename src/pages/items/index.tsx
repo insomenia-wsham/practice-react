@@ -1,6 +1,5 @@
 import { API_URL, getCategory, getItems, getCarts } from '@api';
 import { useQuery } from 'react-query';
-import useAuth from '@hooks/useAuth';
 import { Item } from '@constants';
 import { currency } from '@js/utils';
 import { useFormik } from 'formik';
@@ -22,26 +21,11 @@ interface ItemFilterProps {
 }
 
 const ItemIndexPage = ({ f7route }) => {
-  const { authenticateUser, currentUser } = useAuth();
   const { data, status, error } = useQuery<any>('carts', getCarts());
   const { is_main, category_id } = f7route.query;
-  const [viewType, setViewType] = useState('grid');
+  const [viewType, setViewType] = useState<string>('grid');
   const [category, setCategory] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [itemIndex, setItemIndex] = useState(0);
   const [itemList, setItemList] = useState([]);
-  // const [result, setResult] = useState(itemList.slice(0, 10));
-
-  // const infiniteScroll = useCallback(() => {
-  //   const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-  //   const scrollTop = Math.max(document.documentElement.scrollTop, document.body.scrollTop);
-  //   const { clientHeight } = document.documentElement;
-
-  //   if (scrollTop + clientHeight === scrollHeight) {
-  //     setItemIndex(itemIndex + 10);
-  //     setResult(result.concat(itemList.slice(itemIndex + 10, itemIndex + 20)));
-  //   }
-  // }, [itemIndex, result]);
 
   useEffect(() => {
     if (category_id) {
@@ -50,23 +34,17 @@ const ItemIndexPage = ({ f7route }) => {
       });
     }
     (async () => {
-      const { data } = await getItems();
-      const { items } = data;
+      const { data: itemData } = await getItems();
+      const { items } = itemData;
       items.sort((a, b) => b.id - a.id);
       if (category_id) {
         const categorySortItem = items.filter((item) => item.category.id === Number(category_id));
         setItemList(categorySortItem);
       } else {
         setItemList(items);
-        // setResult(items.slice(0, 10));
       }
     })();
   }, []);
-
-  // useEffect(() => {
-  //   window.addEventListener('scroll', infiniteScroll, true);
-  //   return () => window.removeEventListener('scroll', infiniteScroll, true);
-  // }, [infiniteScroll]);
 
   const filterForm = useFormik<ItemFilterProps>({
     initialValues: {
@@ -141,7 +119,7 @@ const ItemIndexPage = ({ f7route }) => {
                       mediaItem
                       link={`/items/${item.id}`}
                       title={`${item.id}-${item.name}`}
-                      subtitle={`${currency(item.sale_price)}원`}
+                      subtitle={`${currency(item.sale_price).toLocaleString()}원`}
                       className="w-full"
                     >
                       <img slot="media" src={API_URL + item.image_path} className="w-20 rounded" alt="" />
@@ -155,7 +133,7 @@ const ItemIndexPage = ({ f7route }) => {
                         mediaItem
                         link={`/items/${item.id}`}
                         title={`${item.id}-${item.name}`}
-                        subtitle={`${currency(item.sale_price)}원`}
+                        subtitle={`${currency(item.sale_price).toLocaleString()}원`}
                         header={category_id ? category?.title : ''}
                         className="w-full"
                       >
