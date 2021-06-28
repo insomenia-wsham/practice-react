@@ -1,11 +1,10 @@
-import { updateUser } from '@api';
+import { updateUser, updatePassword } from '@api';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { sleep } from '@utils';
 import { f7, Navbar, Page, List, ListInput, Button, Block, Row, Col } from 'framework7-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import * as Yup from 'yup';
-import useAuth from '@hooks/useAuth';
-import { destroyToken, getToken } from '@store';
+import useUser from '@hooks/useUser';
 
 interface FormValues {
   name: string;
@@ -13,9 +12,9 @@ interface FormValues {
 }
 
 interface PasswordFormValues {
+  current_password: string;
   password: string;
-  new_password: string;
-  new_password_confirmation: string;
+  password_confirmation: string;
 }
 
 const UpdateSchema = Yup.object().shape({
@@ -24,24 +23,27 @@ const UpdateSchema = Yup.object().shape({
 });
 
 const PasswordSchema = Yup.object().shape({
-  password: Yup.string().required('필수 입력사항 입니다.'),
-  new_password: Yup.string().required('필수 입력사항 입니다.'),
-  new_password_confirmation: Yup.string().required('필수 입력사항 입니다.'),
+  current_password: Yup.string().required('필수 입력사항 입니다.'),
+  password: Yup.string().min(4, '길이가 너무 짧습니다').max(50, '길이가 너무 깁니다').required('필수 입력사항 입니다'),
+  password_confirmation: Yup.string()
+    .min(4, '길이가 너무 짧습니다')
+    .max(50, '길이가 너무 깁니다')
+    .required('필수 입력사항 입니다'),
 });
 
-const UserEditPage = ({ f7route }) => {
-  const { authenticateUser, currentUser } = useAuth();
-  const userId = f7route.params.id;
+const UserEditPage = ({ f7router }) => {
+  const { currentUserInfo, handleUpdateUser } = useUser();
+  const { id, email, name } = currentUserInfo;
 
   const initialValues: FormValues = {
-    name: '',
-    email: currentUser?.email,
+    name,
+    email,
   };
 
   const initialValuesPassword = {
+    current_password: '',
     password: '',
-    new_password: '',
-    new_password_confirmation: '',
+    password_confirmation: '',
   };
 
   return (
@@ -54,14 +56,15 @@ const UserEditPage = ({ f7route }) => {
           await sleep(400);
           f7.dialog.preloader('잠시만 기다려주세요...');
           try {
-            const { data } = await updateUser(userId, { ...values });
-            authenticateUser(getToken());
+            await updateUser(id, { ...values });
+            handleUpdateUser({ id, email, name: values.name });
           } catch (e) {
             throw new Error(e);
           } finally {
             setSubmitting(false);
             f7.dialog.close();
-            f7.dialog.alert('수정이 완료되었습니다.');
+            f7.dialog.alert('수정하였습니다.');
+            f7router.back();
           }
         }}
         validateOnMount
@@ -95,55 +98,77 @@ const UserEditPage = ({ f7route }) => {
         )}
       </Formik>
 
-      {/* <Formik
-				initialValues={initialValuesPassword}
-				validationSchema={PasswordSchema}
-				onSubmit={async (values, { setSubmitting }: FormikHelpers<PasswordFormValues>) => {
-					await sleep(400);
-					f7.dialog.preloader('잠시만 기다려주세요...');
-					try {
-						// const { data } = await updatePassword(userId, { ...values });
-						// authenticateUser(data);
-					} catch (e) {
-						throw new Error(e);
-					} finally {
-						setSubmitting(false);
-						f7.dialog.close();
-					}
-				}}
-				validateOnMount>
-				{({ handleChange, handleBlur, values, errors, touched, isSubmitting, isValid }) => (
-					<Form>
-						<List inlineLabels noHairlinesMd>
-							<p className="p-3 text-base font-bold">비밀번호 변경</p>
-							<ListInput label="현재 비밀번호" type="password" name="password" placeholder="현재 비밀번호를 입력해주세요"
-								value={values.password}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								clearButton />
-							<ListInput label="새 비밀번호" type="password" name="new_password" placeholder="새 비밀번호를 입력해주세요"
-								value={values.new_password}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								clearButton />
-							<ListInput label="비밀번호 확인" type="password" name="new_password_confirmation" placeholder="새 비밀번호를 한번 더 확인해주세요"
-								value={values.new_password_confirmation}
-								onChange={handleChange}
-								onBlur={handleBlur}
-								clearButton />
-							<Block strong>
-								<Row>
-									<Col>
-										<Button raised className="m-5 mx-auto w-6/12" type="submit" disabled={isSubmitting || !isValid}>
-											비민번호 변경
-										</Button>
-									</Col>
-								</Row>
-							</Block>
-						</List>
-					</Form>
-				)}
-			</Formik> */}
+      <Formik
+        initialValues={initialValuesPassword}
+        validationSchema={PasswordSchema}
+        onSubmit={async (values, { setSubmitting }: FormikHelpers<PasswordFormValues>) => {
+          await sleep(400);
+          f7.dialog.preloader('잠시만 기다려주세요...');
+          try {
+            const { data } = await updatePassword({ ...values });
+            f7.dialog.close();
+            if (data.status === 400) {
+              f7.dialog.alert('현재 비밀번호가 일치하지 않습니다.');
+            } else {
+              f7.dialog.alert('비밀번호 변경을 완료하였습니다.');
+            }
+          } catch (e) {
+            f7.dialog.close();
+            throw new Error(e);
+          } finally {
+            setSubmitting(false);
+            f7router.back();
+          }
+        }}
+        validateOnMount
+      >
+        {({ handleChange, handleBlur, values, errors, touched, isSubmitting, isValid }) => (
+          <Form>
+            <List inlineLabels noHairlinesMd>
+              <p className="p-3 text-base font-bold">비밀번호 변경</p>
+              <ListInput
+                label="현재 비밀번호"
+                type="password"
+                name="current_password"
+                placeholder="현재 비밀번호를 입력해주세요"
+                value={values.current_password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                clearButton
+              />
+              <ListInput
+                label="새 비밀번호"
+                type="password"
+                name="password"
+                placeholder="새 비밀번호를 입력해주세요"
+                value={values.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                clearButton
+              />
+              <ListInput
+                label="비밀번호 확인"
+                type="password"
+                name="password_confirmation"
+                placeholder="새 비밀번호를 한번 더 확인해주세요"
+                value={values.password_confirmation}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                clearButton
+              />
+              <Block strong>
+                <Row>
+                  <Col>
+                    <Button raised className="m-5 mx-auto w-6/12" type="submit" disabled={isSubmitting || !isValid}>
+                      비민번호 변경
+                    </Button>
+                  </Col>
+                </Row>
+              </Block>
+            </List>
+          </Form>
+        )}
+      </Formik>
     </Page>
   );
 };
