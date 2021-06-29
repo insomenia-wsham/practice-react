@@ -1,12 +1,23 @@
-import { API_URL, getCategory, getItems, getCarts } from '@api';
-import { useQuery } from 'react-query';
+import {
+  API_URL,
+  getCategory,
+  getItems,
+  getCarts,
+  createCart,
+  getInterestList,
+  deleteInterestItem,
+  createInterestItem,
+} from '@api';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Item } from '@constants';
 import { currency } from '@js/utils';
 import { useFormik } from 'formik';
-import { Link, List, ListInput, ListItem, Navbar, NavRight, NavTitle, Page, Row, Col } from 'framework7-react';
+import { f7, Link, List, ListInput, ListItem, Navbar, NavRight, NavTitle, Page } from 'framework7-react';
 import { map } from 'lodash';
 import React, { useEffect, useState, useRef } from 'react';
 import i18n from '../../assets/lang/i18n';
+
+import icoCart from '../../assets/images/ico_cart.svg';
 
 const SortStates = [
   ['created_at desc', '최신순'],
@@ -22,7 +33,12 @@ interface ItemFilterProps {
 
 const ItemIndexPage = ({ f7route }) => {
   const { data, status, error } = useQuery<any>('carts', getCarts());
+  const { data: interestsData } = useQuery<any>('interest', getInterestList());
   const { is_main, category_id } = f7route.query;
+  const deleteInterestMutation = useMutation(deleteInterestItem());
+  const createInterestMutation = useMutation(createInterestItem());
+  const createCartMutation = useMutation(createCart());
+  const queryClient = useQueryClient();
   const [viewType, setViewType] = useState<string>('grid');
   const [category, setCategory] = useState(null);
   const [itemList, setItemList] = useState([]);
@@ -96,6 +112,31 @@ const ItemIndexPage = ({ f7route }) => {
     return `${lastValue === 0 ? 0 : parseFloat((Number(lastValue) * 100).toFixed(1))}%`;
   };
 
+  const handleCartCreate = (itemId, itemName, itemPrice) => {
+    f7.dialog.confirm(
+      `<div>
+        <p>${itemName}</p>
+        <p>${itemPrice.toLocaleString()}원</p>
+        <p>정말 장바구니에 담겠습니까?</p>
+      </div>`,
+      '알림',
+      () => {
+        createCartMutation.mutate(
+          { item_id: itemId, item_count: 1 },
+          {
+            onSuccess: () => {
+              f7.dialog.alert('성공적으로 담겼습니다. ');
+              queryClient.invalidateQueries(`carts`);
+            },
+          },
+        );
+      },
+      () => {
+        f7.dialog.alert('취소되었습니다.');
+      },
+    );
+  };
+
   return (
     <Page
       noToolbar={!is_main}
@@ -165,55 +206,81 @@ const ItemIndexPage = ({ f7route }) => {
                   </React.Fragment>
                 ))
               : itemList.map((item: Item, i) => (
-                  // <React.Fragment key={item.id}>
-                  //   <div className="w-1/2 inline-flex grid-list-item relative">
-                  //     <ListItem
-                  //       mediaItem
-                  //       link={`/items/${item.id}`}
-                  //       title={`${item.id}-${item.name}`}
-                  //       subtitle={`${currency(item.sale_price).toLocaleString()}원`}
-                  //       header={category_id ? category?.title : ''}
-                  //       className="w-full"
-                  //     >
-                  //       <img
-                  //         slot="media"
-                  //         alt=""
-                  //         src={API_URL + item.image_path}
-                  //         className="w-40 m-auto radius rounded shadow"
-                  //       />
-                  //     </ListItem>
-                  //   </div>
-                  // </React.Fragment>
                   <React.Fragment key={item.id}>
-                    <a href={`/items/${item.id}`}>
-                      <div className="inline-block mx-auto w-1/2">
+                    <div className="relative inline-block mx-auto w-1/2">
+                      <a href={`/items/${item.id}`}>
                         <img
                           slot="media"
                           alt=""
                           src={API_URL + item.image_path}
                           className="w-40 m-auto mb-3 radius rounded shadow"
                         />
-                        <div className="w-40 m-auto mb-6">
-                          <div>
-                            {salePercent(item.list_price, item.sale_price) !== '0%' ? (
-                              <b className="rounded-sm bg-yellow-500 text-white px-2">할인판매</b>
-                            ) : (
-                              <b className="rounded-sm bg-blue-500 text-white px-2">인기상품</b>
-                            )}
-                          </div>
+                      </a>
+                      <div
+                        className="absolute right-5 bottom-28"
+                        onClick={() => handleCartCreate(item.id, item.name, item.sale_price)}
+                      >
+                        <button>
+                          <img src={icoCart} />
+                        </button>
+                      </div>
+                      <div className="absolute right-5 bottom-14">
+                        <button>
+                          {interestsData.interests.find((interest) => interest.item_id === item.id) ? (
+                            <i
+                              className="mb-2 la la-heart text-2xl text-red-500"
+                              onClick={() =>
+                                deleteInterestMutation.mutate(
+                                  {
+                                    id: interestsData.interests.find((interest) => interest.item_id === item.id).id,
+                                  },
+                                  {
+                                    onSuccess: () => {
+                                      queryClient.invalidateQueries('interest');
+                                    },
+                                  },
+                                )
+                              }
+                            />
+                          ) : (
+                            <i
+                              className="mb-2 la la-heart-o text-2xl text-gray-400"
+                              onClick={() =>
+                                createInterestMutation.mutate(
+                                  {
+                                    item_id: item.id,
+                                  },
+                                  {
+                                    onSuccess: () => {
+                                      queryClient.invalidateQueries('interest');
+                                    },
+                                  },
+                                )
+                              }
+                            />
+                          )}
+                        </button>
+                      </div>
+                      <div className="w-40 m-auto mb-6">
+                        <div>
+                          {salePercent(item.list_price, item.sale_price) !== '0%' ? (
+                            <b className="rounded-sm bg-yellow-500 text-white px-2">할인판매</b>
+                          ) : (
+                            <b className="rounded-sm bg-blue-500 text-white px-2">인기상품</b>
+                          )}
+                        </div>
 
-                          <p>{`${item.id}-${item.name}`}</p>
-                          <div>
-                            {salePercent(item.list_price, item.sale_price) !== '0%' ? (
-                              <b className="text-base text-red-500 mr-2">
-                                {salePercent(item.list_price, item.sale_price)}
-                              </b>
-                            ) : null}
-                            <b className="text-lg">{currency(item.sale_price).toLocaleString()}</b>원
-                          </div>
+                        <p>{`${item.id}-${item.name}`}</p>
+                        <div>
+                          {salePercent(item.list_price, item.sale_price) !== '0%' ? (
+                            <b className="text-base text-red-500 mr-2">
+                              {salePercent(item.list_price, item.sale_price)}
+                            </b>
+                          ) : null}
+                          <b className="text-lg">{currency(item.sale_price).toLocaleString()}</b>원
                         </div>
                       </div>
-                    </a>
+                    </div>
                   </React.Fragment>
                 ))}
           </ul>

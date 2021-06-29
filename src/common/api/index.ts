@@ -89,6 +89,12 @@ export const getInterestList = () => async () => {
   return data;
 };
 
+// 관심상품 등록 1
+export const createInterestItem = () => async (params: { item_id: number }) => {
+  const { data } = await API.post<{ success: boolean }>(`/interests`, { interest: params });
+  return data;
+};
+
 // 관심상품 등록
 export const createInterest = async (params: { item_id: number }, callback) => {
   const { data } = await API.post<{ success: boolean }>(`/interests`, { interest: params });

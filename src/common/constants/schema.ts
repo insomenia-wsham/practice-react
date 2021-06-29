@@ -1,4 +1,5 @@
 import { Address } from '@constants';
+import { boolean } from 'yup/lib/locale';
 
 interface DefaultProps {
   id: number;
@@ -41,6 +42,7 @@ export interface Item extends DefaultProps {
   category?: Category;
   images?: Image[];
   user?: User;
+  interest?: boolean;
 }
 
 export interface Post extends DefaultProps {
