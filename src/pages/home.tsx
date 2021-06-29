@@ -24,8 +24,8 @@ const HomePage = () => {
         </NavLeft>
         <NavTitle>Insomenia</NavTitle>
         <NavRight>
-          {/* <Link href="/carts" iconF7="cart" badgeColor="red" /> */}
-          <Link href="/carts" iconF7="search" badgeColor="red" />
+          <Link href="/carts" iconF7="cart" badgeColor="red" />
+          {/* <Link href="/carts" iconF7="search" badgeColor="red" /> */}
         </NavRight>
       </Navbar>
       <div

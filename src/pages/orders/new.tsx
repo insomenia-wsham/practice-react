@@ -62,6 +62,7 @@ const OrderNewPage = ({ f7route, f7router }) => {
                         },
                       ]
                     : data.carts,
+                  direct: f7route.params.itemId > 0,
                 });
               } else {
                 f7.dialog.alert('선택된 상품이 없습니다. 처음부터 다시 이용해주세요.');

@@ -3,9 +3,9 @@ import { useQuery } from 'react-query';
 import { Item } from '@constants';
 import { currency } from '@js/utils';
 import { useFormik } from 'formik';
-import { Link, List, ListInput, ListItem, Navbar, NavRight, NavTitle, Page } from 'framework7-react';
+import { Link, List, ListInput, ListItem, Navbar, NavRight, NavTitle, Page, Row, Col } from 'framework7-react';
 import { map } from 'lodash';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import i18n from '../../assets/lang/i18n';
 
 const SortStates = [
@@ -26,6 +26,34 @@ const ItemIndexPage = ({ f7route }) => {
   const [viewType, setViewType] = useState<string>('grid');
   const [category, setCategory] = useState(null);
   const [itemList, setItemList] = useState([]);
+  const [itemTotalCount, setItemTotalCount] = useState(0);
+  const [filterValues, setFilterValues] = useState({
+    offset: 0,
+    limit: 20,
+    s: 'created_at desc',
+  });
+
+  const allowInfinite = useRef(true);
+  const [showPreloader, setShowPreloader] = useState(true);
+
+  const loadMore = () => {
+    if (!allowInfinite.current) return;
+    allowInfinite.current = false;
+
+    setTimeout(async () => {
+      if (itemList.length >= itemTotalCount) {
+        setShowPreloader(false);
+        return;
+      }
+      const { data: itemData } = await getItems({
+        q: { category_id_eq: category_id, s: filterValues.s },
+        offset: filterValues.offset + 20,
+        limit: filterValues.limit + 20,
+      });
+      allowInfinite.current = true;
+      setItemList((prev) => [...prev, ...itemData.items]);
+    }, 1000);
+  };
 
   useEffect(() => {
     if (category_id) {
@@ -34,17 +62,15 @@ const ItemIndexPage = ({ f7route }) => {
       });
     }
     (async () => {
-      const { data: itemData } = await getItems();
-      const { items } = itemData;
-      items.sort((a, b) => b.id - a.id);
-      if (category_id) {
-        const categorySortItem = items.filter((item) => item.category.id === Number(category_id));
-        setItemList(categorySortItem);
-      } else {
-        setItemList(items);
-      }
+      const { data: itemData } = await getItems({
+        q: { category_id_eq: category_id, s: filterValues.s },
+        offset: filterValues.offset,
+        limit: filterValues.limit,
+      });
+      setItemList(itemData.items);
+      setItemTotalCount(itemData.total_count);
     })();
-  }, []);
+  }, [filterValues]);
 
   const filterForm = useFormik<ItemFilterProps>({
     initialValues: {
@@ -52,13 +78,10 @@ const ItemIndexPage = ({ f7route }) => {
       category_id_eq: category_id,
     },
     onSubmit: async (res) => {
-      if (res.s === 'sale_price desc') {
-        itemList.sort((a, b) => b.sale_price - a.sale_price);
-      } else if (res.s === 'sale_price asc') {
-        itemList.sort((a, b) => a.sale_price - b.sale_price);
-      } else {
-        itemList.sort((a, b) => b.id - a.id);
-      }
+      setFilterValues({
+        ...filterValues,
+        s: res.s,
+      });
     },
   });
 
@@ -66,8 +89,23 @@ const ItemIndexPage = ({ f7route }) => {
     done();
   };
 
+  const salePercent = (list_price: number, sale_price: number) => {
+    const saleValue = list_price - sale_price;
+    const lastValue = saleValue / list_price;
+
+    return `${lastValue === 0 ? 0 : parseFloat((Number(lastValue) * 100).toFixed(1))}%`;
+  };
+
   return (
-    <Page noToolbar={!is_main} onPtrRefresh={onRefresh} ptr>
+    <Page
+      noToolbar={!is_main}
+      onPtrRefresh={onRefresh}
+      infinite
+      infiniteDistance={50}
+      infinitePreloader={showPreloader}
+      onInfinite={loadMore}
+      ptr
+    >
       <Navbar backLink={!is_main}>
         <NavTitle>{(category && category.title) || '쇼핑'}</NavTitle>
         <NavRight>
@@ -77,7 +115,7 @@ const ItemIndexPage = ({ f7route }) => {
 
       <form onSubmit={filterForm.handleSubmit} className="item-list-form p-3 table w-full border-b">
         <div className="float-left">
-          총 <b>{currency((itemList && itemList.length) || 0)}</b>개 상품
+          총 <b>{currency(itemTotalCount || 0)}</b>개 상품
         </div>
         <ListInput
           type="select"
@@ -108,7 +146,7 @@ const ItemIndexPage = ({ f7route }) => {
           ))}
         </ListInput>
       </form>
-      <List noHairlines className="mt-0 text-sm font-thin ">
+      <List noHairlines className="mt-4 text-sm font-thin ">
         {itemList && (
           <ul>
             {viewType === 'list'
@@ -127,24 +165,55 @@ const ItemIndexPage = ({ f7route }) => {
                   </React.Fragment>
                 ))
               : itemList.map((item: Item, i) => (
+                  // <React.Fragment key={item.id}>
+                  //   <div className="w-1/2 inline-flex grid-list-item relative">
+                  //     <ListItem
+                  //       mediaItem
+                  //       link={`/items/${item.id}`}
+                  //       title={`${item.id}-${item.name}`}
+                  //       subtitle={`${currency(item.sale_price).toLocaleString()}원`}
+                  //       header={category_id ? category?.title : ''}
+                  //       className="w-full"
+                  //     >
+                  //       <img
+                  //         slot="media"
+                  //         alt=""
+                  //         src={API_URL + item.image_path}
+                  //         className="w-40 m-auto radius rounded shadow"
+                  //       />
+                  //     </ListItem>
+                  //   </div>
+                  // </React.Fragment>
                   <React.Fragment key={item.id}>
-                    <div className="w-1/2 inline-flex grid-list-item relative">
-                      <ListItem
-                        mediaItem
-                        link={`/items/${item.id}`}
-                        title={`${item.id}-${item.name}`}
-                        subtitle={`${currency(item.sale_price).toLocaleString()}원`}
-                        header={category_id ? category?.title : ''}
-                        className="w-full"
-                      >
+                    <a href={`/items/${item.id}`}>
+                      <div className="inline-block mx-auto w-1/2">
                         <img
                           slot="media"
                           alt=""
                           src={API_URL + item.image_path}
-                          className="w-40 m-auto radius rounded shadow"
+                          className="w-40 m-auto mb-3 radius rounded shadow"
                         />
-                      </ListItem>
-                    </div>
+                        <div className="w-40 m-auto mb-6">
+                          <div>
+                            {salePercent(item.list_price, item.sale_price) !== '0%' ? (
+                              <b className="rounded-sm bg-yellow-500 text-white px-2">할인판매</b>
+                            ) : (
+                              <b className="rounded-sm bg-blue-500 text-white px-2">인기상품</b>
+                            )}
+                          </div>
+
+                          <p>{`${item.id}-${item.name}`}</p>
+                          <div>
+                            {salePercent(item.list_price, item.sale_price) !== '0%' ? (
+                              <b className="text-base text-red-500 mr-2">
+                                {salePercent(item.list_price, item.sale_price)}
+                              </b>
+                            ) : null}
+                            <b className="text-lg">{currency(item.sale_price).toLocaleString()}</b>원
+                          </div>
+                        </div>
+                      </div>
+                    </a>
                   </React.Fragment>
                 ))}
           </ul>

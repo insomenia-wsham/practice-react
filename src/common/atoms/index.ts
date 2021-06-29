@@ -1,5 +1,5 @@
 import { atom } from 'recoil';
-import { AuthState, CartData } from '@constants';
+import { AuthState, CartData, UserInfo } from '@constants';
 
 const initialAuthState: AuthState = {
   token: null,
@@ -12,7 +12,7 @@ const initialCartData: any = {
   total_count: null,
 };
 
-const initialUserInfo: any = {
+const initialUserInfo: UserInfo = {
   id: null,
   name: null,
   email: null,
@@ -23,7 +23,7 @@ export const authState = atom<AuthState>({
   default: initialAuthState,
 });
 
-export const userInfo = atom<any>({
+export const userInfo = atom<UserInfo>({
   key: 'userInfo',
   default: initialUserInfo,
 });

@@ -56,9 +56,10 @@ const CartIndexPage = () => {
               title={cart.item.name}
               after={`${(cart.item_count * cart.item.sale_price).toLocaleString()} 원`}
               text={cart.item.description}
+              className="py-2"
             >
               <img slot="media" src={API_URL + cart.item.image_path} width="80" />
-              <dd className="py-4 text-center">
+              <dd className="py-3 text-center">
                 <span className="quantity">
                   <button
                     className="decrease w-20"
@@ -111,7 +112,7 @@ const CartIndexPage = () => {
                 <Block strong>
                   <Row>
                     <Col>
-                      <Button fill raised className="m-5 py-6 mx-auto w-9/12" type="submit">
+                      <Button fill raised className="m-5 py-6 mx-auto w-9/12 text-lg" type="submit">
                         <Link href="/orders/new">주문하기</Link>
                       </Button>
                     </Col>

@@ -74,6 +74,7 @@ export interface CreateOrder {
   receiver_address: string;
   receiver_address_detail: string;
   receiver_name: string;
+  direct?: boolean;
 }
 
 export interface IterestData {
@@ -118,4 +119,10 @@ export interface Review {
 export interface ReviewData {
   reviews: Review[];
   total_count: number;
+}
+
+export interface UserInfo {
+  id: number;
+  email: string;
+  name: string;
 }
