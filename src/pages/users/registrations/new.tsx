@@ -2,9 +2,10 @@ import { signupAPI } from '@api';
 import useAuth from '@hooks/useAuth';
 import { sleep } from '@utils';
 import { Form, Formik, FormikHelpers } from 'formik';
-import { f7, List, ListInput, Navbar, Page } from 'framework7-react';
+import { f7, List, ListInput, Page, Button } from 'framework7-react';
 import React from 'react';
 import * as Yup from 'yup';
+import i18n from '../../../assets/lang/i18n';
 
 interface FormValues {
   name: string;
@@ -33,9 +34,8 @@ const SignUpPage = () => {
   };
 
   return (
-    <Page>
-      <Navbar title="Insomenia" backLink sliding={false} />
-      <p className="font-semibole text-2xl text-center mt-5">회원가입</p>
+    <Page className="px-4">
+      <p className="font-semibole text-2xl text-center mt-12">MARKETQ</p>
       <Formik
         initialValues={initialValues}
         validationSchema={SignUpSchema}
@@ -57,9 +57,8 @@ const SignUpPage = () => {
         {({ handleChange, handleBlur, values, errors, touched, isSubmitting, isValid }) => (
           <Form>
             <List noHairlinesMd>
-              <div className="p-3 font-semibold bg-white">기본 정보</div>
               <ListInput
-                label={i18next.t('login.name')}
+                label={String(i18n.t('login.name'))}
                 type="text"
                 name="name"
                 placeholder="이름을 입력해주세요"
@@ -71,7 +70,7 @@ const SignUpPage = () => {
                 errorMessage={touched.name && errors.name}
               />
               <ListInput
-                label={i18next.t('login.email')}
+                label={String(i18n.t('login.email'))}
                 type="email"
                 name="email"
                 placeholder="이메일을 입력해주세요"
@@ -120,6 +119,9 @@ const SignUpPage = () => {
           </Form>
         )}
       </Formik>
+      <Button className="w-full rounded-none" large href="/users/sign_in">
+        이미 계정이 있습니다
+      </Button>
     </Page>
   );
 };

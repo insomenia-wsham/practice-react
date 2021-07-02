@@ -1,9 +1,10 @@
 import { loginAPI } from '@api';
 import useAuth from '@hooks/useAuth';
 import { Formik, FormikHelpers } from 'formik';
-import { f7, List, ListInput, Navbar, Page } from 'framework7-react';
+import { f7, List, ListInput, Page, Link } from 'framework7-react';
 import React from 'react';
 import * as Yup from 'yup';
+import i18n from '../../../assets/lang/i18n';
 
 interface FormValues {
   email: string;
@@ -25,17 +26,16 @@ const SessionNewPage = () => {
     try {
       const { data: user } = await loginAPI({ ...params });
       authenticateUser(user);
-      f7.dialog.alert('성공적으로 로그인 하였습니다. ');
+      // f7.dialog.alert('성공적으로 로그인 하였습니다. ', '알림');
     } catch (error) {
-      f7.dialog.alert('정보를 확인 해주세요. ');
+      // f7.dialog.alert('정보를 확인 해주세요. ', '알림');
       setSubmitting(false);
     }
   };
 
   return (
-    <Page className="bg-white">
-      <Navbar title="Insomenia" backLink sliding={false} />
-      <p className="font-semibole text-2xl text-center mt-5">로그인</p>
+    <Page className="bg-white px-4">
+      <p className="font-semibole text-2xl text-center mt-12">MARKETQ</p>
       <Formik
         initialValues={initialValues}
         validationSchema={SignInSchema}
@@ -46,7 +46,7 @@ const SessionNewPage = () => {
           <form onSubmit={handleSubmit}>
             <List>
               <ListInput
-                label={i18next.t('login.email')}
+                label={String(i18n.t('login.email'))}
                 name="email"
                 type="email"
                 placeholder="이메일을 입력해주세요."
@@ -58,7 +58,7 @@ const SessionNewPage = () => {
                 errorMessage={touched.email && errors.email}
               />
               <ListInput
-                label={i18next.t('login.password')}
+                label={String(i18n.t('login.password'))}
                 name="password"
                 type="password"
                 placeholder="비밀번호를 입력해주세요."
@@ -82,6 +82,17 @@ const SessionNewPage = () => {
           </form>
         )}
       </Formik>
+      <div className="mt-6 grid grid-cols-3 px-2">
+        <div>
+          <Link href="/users/sign_up">
+            <span>회원가입</span>
+          </Link>
+        </div>
+        <div className="col-span-2 text-right">
+          <span className="mr-2">아이디 찾기</span>
+          <span>비밀번호 찾기</span>
+        </div>
+      </div>
     </Page>
   );
 };
