@@ -45,14 +45,14 @@ const F7Views = () => {
     <Views tabs className="safe-areas">
       <Toolbar tabbar labels bottom>
         <Link tabLink="#view-home" tabLinkActive icon="las la-home" text="홈" />
-        <Link tabLink="#view-items" icon="las la-gift" text="상품" />
-        <Link tabLink="#view-interests" icon="las la-heart" text="관심" />
+        <Link tabLink="#view-items" icon="las la-search" text="검색" />
+        <Link tabLink="#view-category" icon="las la-bars" text="카테고리" />
+        <Link tabLink="#view-mypage" icon="las la-user" text="마이큐" />
         <Link tabLink="#view-carts" icon="las la-shopping-cart" text="장바구니" />
-        <Link tabLink="#view-mypage" icon="las la-user" text="마이페이지" />
       </Toolbar>
       <View id="view-home" stackPages main tab tabActive url="/" iosDynamicNavbar={false} />
-      <View id="view-items" stackPages name="items" tab url="/items?is_main=true/" />
-      <View id="view-interests" stackPages name="interests" tab url="/interests?is_main=true" />
+      <View id="view-category" stackPages name="category" tab url="/category?is_main=true/" />
+      <View id="view-items" stackPages name="items" tab url="/items?is_main=true" />
       <View id="view-carts" stackPages name="carts" tab url="/carts?is_main=true" />
       <View id="view-mypage" stackPages name="mypage" tab url="/mypage?is_main=true" />
     </Views>
