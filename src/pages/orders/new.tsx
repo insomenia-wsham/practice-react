@@ -34,7 +34,6 @@ const OrderNewPage = ({ f7route, f7router }) => {
   const userId: number = currentUser.id;
   const { data, status, error, refetch } = useQuery<any>('carts', getCarts());
   const queryClient = useQueryClient();
-
   return (
     <Page noToolbar>
       <Navbar title="주문서 작성하기" backLink />
@@ -49,20 +48,20 @@ const OrderNewPage = ({ f7route, f7router }) => {
             await sleep(400);
             f7.dialog.preloader('잠시만 기다려주세요...');
             try {
-              if (data.carts.length > 0 || f7route.params.itemId) {
+              if (data.carts.length > 0 || f7route.query.item_id) {
                 await createOrder({
                   ...values,
                   user_id: userId,
-                  item_list: f7route.params.itemId
+                  item_list: f7route.query.item_id
                     ? [
                         {
-                          item_id: f7route.params.itemId,
-                          item_count: f7route.params.itemCount,
-                          item: { sale_price: f7route.params.salePrice },
+                          item_id: f7route.query.item_id,
+                          item_count: f7route.query.item_count,
+                          item: { sale_price: f7route.query.sale_price },
                         },
                       ]
                     : data.carts,
-                  direct: f7route.params.itemId > 0,
+                  direct: f7route.query.item_id > 0,
                 });
               } else {
                 f7.dialog.alert('선택된 상품이 없습니다. 처음부터 다시 이용해주세요.');
@@ -73,9 +72,14 @@ const OrderNewPage = ({ f7route, f7router }) => {
             } catch (e) {
               throw new Error(e);
             } finally {
+              const toastCenter = f7.toast.create({
+                text: '결제완료하였습니다.',
+                position: 'center',
+                closeTimeout: 2000,
+              });
               setSubmitting(false);
               f7.dialog.close();
-              f7.dialog.alert('주문이 완료되었습니다.');
+              toastCenter.open();
               f7router.navigate(`/`);
             }
           }}
@@ -124,7 +128,7 @@ const OrderNewPage = ({ f7route, f7router }) => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                <Button fill className="mt-10" type="submit" disabled={isSubmitting || !isValid}>
+                <Button fill className="mt-10 h-11" type="submit" disabled={isSubmitting || !isValid}>
                   결제하기
                 </Button>
               </List>

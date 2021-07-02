@@ -6,12 +6,13 @@ import { configs } from '@config';
 import LandingPage from '@pages/landing';
 import moment from 'moment';
 
-const OrderIndexPage = () => {
+const OrderIndexPage = ({ f7route }) => {
   const { API_URL } = configs;
+  const { is_main } = f7route.query;
   const { data, status, error } = useQuery<any>('orders', getOrders());
 
   return (
-    <Page noToolbar>
+    <Page noToolbar={!is_main}>
       <Navbar title="주문목록" backLink />
 
       {status === 'loading' && <LandingPage />}
@@ -20,11 +21,11 @@ const OrderIndexPage = () => {
       {data && data.orders.length > 0 ? (
         <List mediaList className="px-4">
           {data.orders.map((order) => (
-            <div key={order.id} className="mb-16">
+            <div key={order.id} className="mb-8">
               <b>{moment(order.created_at).format('YYYY-MM-DD')}</b>
               <span className="float-right">주문상세보기</span>
-              {order.order_details.map((item) => (
-                <List mediaList>
+              {order.order_details.map((item, i) => (
+                <List mediaList key={i} className="my-4">
                   <ListItem
                     key={item.id}
                     link={`/items/${item.item_id}`}
