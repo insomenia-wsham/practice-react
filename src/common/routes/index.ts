@@ -16,12 +16,14 @@ import InterestIndexPage from '@pages/interests';
 import OrderIndexPage from '@pages/orders';
 import OrderNewPage from '@pages/orders/new';
 
+import CategoryIndexPage from '@pages/category';
+
 const routes = [
   { path: '/', component: HomePage },
   { path: '/users/sign_in', component: LoginPage },
   { path: '/users/sign_up', component: SignUpPage },
   { path: '/users/:id', component: UserEditPage },
-  { path: '/intro', component: IntroPage },
+  { path: '/intro', component: LoginPage },
   { path: '/mypage', component: MyPage },
   { path: '/items', component: ItemIndexPage },
   { path: '/items/:id', component: ItemShowPage },
@@ -29,7 +31,8 @@ const routes = [
   { path: '/interests', component: InterestIndexPage },
   { path: '/orders', component: OrderIndexPage },
   { path: '/orders/new', component: OrderNewPage },
-  { path: '/orders/new/:itemId/:itemCount/:salePrice', component: OrderNewPage },
+
+  { path: '/category', component: CategoryIndexPage },
 
   { path: '/posts', component: PostIndexPage },
   { path: '/posts/new', component: PostNewPage },

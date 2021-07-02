@@ -11,9 +11,9 @@ import {
   IterestData,
 } from '@constants';
 import { getToken } from '@store';
-import { data } from 'dom7';
+// import { data } from 'dom7';
 import { PlainAPI, API, VERSION, API_URL } from './api.config';
-import { ApiService } from './api.service';
+// import { ApiService } from './api.service';
 
 export const refresh = (): Promise<{ data: Token }> =>
   PlainAPI.post(
