@@ -63,7 +63,6 @@ const UserEditPage = ({ f7router }) => {
           } finally {
             setSubmitting(false);
             f7.dialog.close();
-            f7.dialog.alert('수정하였습니다.');
             f7router.back();
           }
         }}
@@ -110,7 +109,7 @@ const UserEditPage = ({ f7router }) => {
             if (data.status === 400) {
               f7.dialog.alert('현재 비밀번호가 일치하지 않습니다.');
             } else {
-              f7.dialog.alert('비밀번호 변경을 완료하였습니다.');
+              f7.dialog.alert('비밀번호를 변경하였습니다.');
             }
           } catch (e) {
             f7.dialog.close();
