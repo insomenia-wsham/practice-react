@@ -1,25 +1,25 @@
 import { getInterestList, deleteInterestItem } from '@api';
-import { f7, Navbar, Page, List, ListItem, Button, Block, Link, Segmented } from 'framework7-react';
+import { Navbar, Page, List, ListItem } from 'framework7-react';
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { configs } from '@config';
 import LandingPage from '@pages/landing';
 
-const InterestIndexPage = () => {
+const InterestIndexPage = ({ f7route }) => {
   const { API_URL } = configs;
-
+  const { is_main } = f7route.query;
   const { data, status, error } = useQuery<any>('interest', getInterestList());
   const deleteInterestMutation = useMutation(deleteInterestItem());
   const queryClient = useQueryClient();
 
   return (
-    <Page noToolbar>
-      <Navbar title="관심 목록" backLink />
+    <Page noToolbar={!is_main}>
+      <Navbar title="관심 목록" backLink={!is_main} />
 
       {status === 'loading' && <LandingPage />}
       {status === 'error' && <div>{error}</div>}
 
-      {data && data.interests.length > 0 ? (
+      {data && data.interests && data.interests.length > 0 ? (
         <List mediaList>
           {data.interests.map((interest) => (
             <ListItem
@@ -29,31 +29,23 @@ const InterestIndexPage = () => {
               text={interest.item.description}
             >
               <img slot="media" src={API_URL + interest.item.image_path} width="80" />
-              <Block strong className="mt-6">
-                <Segmented raised tag="p">
-                  <Button
-                    fill
-                    onClick={() =>
-                      deleteInterestMutation.mutate(
-                        {
-                          id: interest.id,
+              <div className="text-center">
+                <i
+                  className="la la-trash pt-1 text-2xl"
+                  onClick={() =>
+                    deleteInterestMutation.mutate(
+                      {
+                        id: interest.id,
+                      },
+                      {
+                        onSuccess: () => {
+                          queryClient.invalidateQueries('interest');
                         },
-                        {
-                          onSuccess: () => {
-                            f7.dialog.alert('성공적으로 삭제되었습니다. ');
-                            queryClient.invalidateQueries('interest');
-                          },
-                        },
-                      )
-                    }
-                  >
-                    삭제하기
-                  </Button>
-                  <Button>
-                    <Link href={`/items/${interest.item_id}`}>바로가기</Link>
-                  </Button>
-                </Segmented>
-              </Block>
+                      },
+                    )
+                  }
+                />
+              </div>
             </ListItem>
           ))}
         </List>

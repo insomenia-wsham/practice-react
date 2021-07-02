@@ -1,30 +1,21 @@
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { getCarts, deleteCartItem, updateCartItem } from '@api';
-import { f7, Navbar, Page, List, ListItem, Button, Block, Row, Col, Link, Segmented } from 'framework7-react';
+import { f7, Navbar, Page, List, ListItem, Button, Block, Row, Col, Link, Segmented, Stepper } from 'framework7-react';
 import { configs } from '@config';
 import LandingPage from '@pages/landing';
 
-const CartIndexPage = () => {
+const CartIndexPage = ({ f7route }) => {
   const { API_URL } = configs;
+  const { is_main } = f7route.query;
   const { data, status, error } = useQuery<any>('carts', getCarts());
   const deleteCartMutation = useMutation(deleteCartItem());
   const updateCartMutation = useMutation(updateCartItem());
   const queryClient = useQueryClient();
 
-  const handleItemCount = (mode: string, id: number, value: number) => {
-    let newItemCount = value;
-    if (mode === 'decrease') {
-      if (value > 1) {
-        newItemCount = value - 1;
-      } else {
-        f7.dialog.alert('삭제하기를 이용해주세요.');
-      }
-    } else if (mode === 'increase') {
-      newItemCount = value + 1;
-    }
+  const handleItemCount = (id, value) => {
     updateCartMutation.mutate(
-      { id, item_count: newItemCount },
+      { id, item_count: value },
       {
         onSuccess: () => {
           queryClient.invalidateQueries('carts');
@@ -42,8 +33,8 @@ const CartIndexPage = () => {
   };
 
   return (
-    <Page noToolbar>
-      <Navbar title="장바구니 목록" backLink />
+    <Page>
+      <Navbar title="장바구니 목록" backLink={!is_main} />
 
       {status === 'loading' && <LandingPage />}
       {status === 'error' && <div>{error}</div>}
@@ -51,56 +42,49 @@ const CartIndexPage = () => {
       {data && data.carts.length > 0 ? (
         <List mediaList>
           {data.carts.map((cart) => (
-            <ListItem
-              key={cart.id}
-              title={cart.item.name}
-              after={`${(cart.item_count * cart.item.sale_price).toLocaleString()} 원`}
-              text={cart.item.description}
-              className="py-2"
-            >
-              <img slot="media" src={API_URL + cart.item.image_path} width="80" />
-              <dd className="py-3 text-center">
-                <span className="quantity">
-                  <button
-                    className="decrease w-20"
-                    onClick={() => handleItemCount('decrease', cart.id, cart.item_count)}
-                  >
-                    -
-                  </button>
-                  <span className="count">{cart.item_count}</span>
-                  <button
-                    className="increase w-20"
-                    onClick={() => handleItemCount('increase', cart.id, cart.item_count)}
-                  >
-                    +
-                  </button>
-                </span>
-              </dd>
-              <Block strong>
-                <Segmented raised tag="p">
-                  <Button
-                    fill
-                    onClick={() =>
-                      deleteCartMutation.mutate(
-                        {
-                          id: cart.id,
-                        },
-                        {
-                          onSuccess: () => {
-                            f7.dialog.alert('성공적으로 삭제되었습니다. ');
-                            queryClient.invalidateQueries('carts');
-                          },
-                        },
-                      )
-                    }
-                  >
-                    삭제하기
-                  </Button>
-                  <Button>
-                    <Link href={`/items/${cart.item_id}`}>바로가기</Link>
-                  </Button>
-                </Segmented>
-              </Block>
+            <ListItem key={cart.id}>
+              <div>
+                <div>
+                  <div className="inline-block">
+                    <Link href={`/items/${cart.item_id}`}>
+                      <img slot="media" src={API_URL + cart.item.image_path} width="80" />
+                    </Link>
+                  </div>
+                  <div className="inline-block w-2/3 float-right">
+                    <div className="inline-block w-32 truncate">{cart.item.name}</div>
+                    <div className="float-right ml-4 text-gray-400 text-sm">{`${(
+                      cart.item_count * cart.item.sale_price
+                    ).toLocaleString()} 원`}</div>
+                    <div className="w-full h-6 text-xs text-gray-300 float-right truncate">{cart.item.description}</div>
+                    <div className="px-4">
+                      <Stepper
+                        fill
+                        className="pt-2"
+                        min={1}
+                        value={cart.item_count}
+                        onStepperChange={(value) => handleItemCount(cart.id, value)}
+                      />
+                      <Block strong className="inline-block pl-10">
+                        <i
+                          className="la la-trash text-2xl"
+                          onClick={() =>
+                            deleteCartMutation.mutate(
+                              {
+                                id: cart.id,
+                              },
+                              {
+                                onSuccess: () => {
+                                  queryClient.invalidateQueries('carts');
+                                },
+                              },
+                            )
+                          }
+                        />
+                      </Block>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </ListItem>
           ))}
           {data.carts.length > 0 ? (
