@@ -58,6 +58,12 @@ const UserEditPage = ({ f7router }) => {
           try {
             await updateUser(id, { ...values });
             handleUpdateUser({ id, email, name: values.name });
+            const toastCenter = f7.toast.create({
+              text: '개인정보를 변경하였습니다.',
+              position: 'center',
+              closeTimeout: 1000,
+            });
+            toastCenter.open();
           } catch (e) {
             throw new Error(e);
           } finally {
@@ -111,17 +117,16 @@ const UserEditPage = ({ f7router }) => {
               closeTimeout: 1000,
             });
             f7.dialog.close();
+            setSubmitting(false);
             if (data.status === 400) {
               f7.dialog.alert('현재 비밀번호가 일치하지 않습니다.', '알림');
             } else {
               toastCenter.open();
+              f7router.back();
             }
           } catch (e) {
             f7.dialog.close();
             throw new Error(e);
-          } finally {
-            setSubmitting(false);
-            f7router.back();
           }
         }}
         validateOnMount
