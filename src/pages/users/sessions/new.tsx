@@ -26,7 +26,6 @@ const SessionNewPage = () => {
     try {
       const { data: user } = await loginAPI({ ...params });
       authenticateUser(user);
-      // f7.dialog.alert('성공적으로 로그인 하였습니다. ', '알림');
     } catch (error) {
       // f7.dialog.alert('정보를 확인 해주세요. ', '알림');
       setSubmitting(false);

@@ -105,11 +105,16 @@ const UserEditPage = ({ f7router }) => {
           f7.dialog.preloader('잠시만 기다려주세요...');
           try {
             const { data } = await updatePassword({ ...values });
+            const toastCenter = f7.toast.create({
+              text: '비밀번호를 변경하였습니다.',
+              position: 'center',
+              closeTimeout: 1000,
+            });
             f7.dialog.close();
             if (data.status === 400) {
-              f7.dialog.alert('현재 비밀번호가 일치하지 않습니다.');
+              f7.dialog.alert('현재 비밀번호가 일치하지 않습니다.', '알림');
             } else {
-              f7.dialog.alert('비밀번호를 변경하였습니다.');
+              toastCenter.open();
             }
           } catch (e) {
             f7.dialog.close();

@@ -32,7 +32,7 @@ import useAuth from '@hooks/useAuth';
 import moment from 'moment';
 import LandingPage from '@pages/landing';
 
-const ItemShowPage = ({ f7route }: PageRouteProps) => {
+const ItemShowPage = ({ f7route, f7router }: PageRouteProps) => {
   const queryClient = useQueryClient();
   const { currentUser } = useAuth();
   const userId = currentUser.id;
@@ -88,7 +88,7 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
   const handleReviewDistroy = async (id, item_id) => {
     f7.dialog.confirm(
       '정말 삭제하시겠습니까?',
-      'Practice React',
+      '알림',
       () => {
         deleteReviewMutation.mutate(
           {
@@ -97,7 +97,6 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
           },
           {
             onSuccess: () => {
-              // f7.dialog.alert('성공적으로 삭제되었습니다. ');
               queryClient.invalidateQueries(`reviews-${itemId}`);
             },
           },
@@ -252,12 +251,18 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
               <Button large raised className="w-1/2" onClick={handleCartCreate} sheetClose>
                 장바구니 담기
               </Button>
-              <Button large fill className="w-1/2" sheetClose>
-                <Link
-                  href={`/orders/new?item_id=${itemId}&item_count=${itemCount}&sale_price=${item && item.sale_price}`}
-                >
-                  바로 구매하기
-                </Link>
+              <Button
+                large
+                fill
+                className="w-1/2"
+                sheetClose
+                onClick={() =>
+                  f7router.navigate(
+                    `/orders/new?item_id=${itemId}&item_count=${itemCount}&sale_price=${item && item.sale_price}`,
+                  )
+                }
+              >
+                바로 구매하기
               </Button>
             </div>
           </div>
@@ -302,7 +307,7 @@ const ItemShowPage = ({ f7route }: PageRouteProps) => {
           {reviews && reviews.total_count > 0 ? (
             <div>
               <div className="py-4 pl-4 border-t border-b bg-gray-50">
-                <p>{`총 댓글(${reviews.total_count})`}</p>
+                <div>{`총 댓글(${reviews.total_count})`}</div>
               </div>
               <ul className="list-none">
                 {reviews.reviews.map((info) => (

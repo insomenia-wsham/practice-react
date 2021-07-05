@@ -295,7 +295,7 @@ const ItemIndexPage = ({ f7route }) => {
                           )}
                         </div>
 
-                        <p>{`${item.name}`}</p>
+                        <div>{`${item.name}`}</div>
                         <div>
                           {salePercent(item.list_price, item.sale_price) !== '0%' ? (
                             <b className="text-base text-red-500 mr-2">

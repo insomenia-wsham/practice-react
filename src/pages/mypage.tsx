@@ -79,20 +79,20 @@ const MyPage = () => {
         <div className="bg-white overflow-hidden sm:rounded-md">
           <List medial-list>
             <ListItem title="회원 정보 수정" subtitle="Beatles" link={`/users/${currentUser?.id}`}>
-              <i className="la la-pencil-square" slot="media" width="44" />
+              <i className="la la-pencil-square" slot="media" />
             </ListItem>
             <ListItem title="주문 목록" subtitle="Beatles" link="/orders">
-              <i className="la la-file-text" slot="media" width="44" />
+              <i className="la la-file-text" slot="media" />
             </ListItem>
             <ListItem title="장바구니 목록" subtitle="Beatles" link="/carts">
-              <i className="la la-shopping-cart" slot="media" width="44" />
+              <i className="la la-shopping-cart" slot="media" />
             </ListItem>
             <ListItem title="관심 목록" subtitle="Beatles" link="/interests">
-              <i className="lar la-heart" slot="media" width="44" />
+              <i className="lar la-heart" slot="media" />
             </ListItem>
             {isAuthenticated ? (
               <ListItem title="로그아웃" subtitle="Beatles" link="#" onClick={logoutHandler}>
-                <i className="la la-unlock-alt" slot="media" width="44" />
+                <i className="la la-unlock-alt" slot="media" />
               </ListItem>
             ) : null}
           </List>

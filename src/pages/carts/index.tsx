@@ -12,6 +12,11 @@ const CartIndexPage = ({ f7route }) => {
   const deleteCartMutation = useMutation(deleteCartItem());
   const updateCartMutation = useMutation(updateCartItem());
   const queryClient = useQueryClient();
+  const toastCenter = f7.toast.create({
+    text: '삭제되었습니다.',
+    position: 'center',
+    closeTimeout: 1000,
+  });
 
   const handleItemCount = (id, value) => {
     updateCartMutation.mutate(
@@ -33,7 +38,7 @@ const CartIndexPage = ({ f7route }) => {
   };
 
   return (
-    <Page>
+    <Page noToolbar={!is_main}>
       <Navbar title="장바구니 목록" backLink={!is_main} />
 
       {status === 'loading' && <LandingPage />}
@@ -75,6 +80,7 @@ const CartIndexPage = ({ f7route }) => {
                               {
                                 onSuccess: () => {
                                   queryClient.invalidateQueries('carts');
+                                  toastCenter.open();
                                 },
                               },
                             )

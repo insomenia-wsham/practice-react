@@ -1,5 +1,5 @@
 import { getInterestList, deleteInterestItem } from '@api';
-import { Navbar, Page, List, ListItem } from 'framework7-react';
+import { f7, Navbar, Page, List, ListItem } from 'framework7-react';
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { configs } from '@config';
@@ -11,6 +11,11 @@ const InterestIndexPage = ({ f7route }) => {
   const { data, status, error } = useQuery<any>('interest', getInterestList());
   const deleteInterestMutation = useMutation(deleteInterestItem());
   const queryClient = useQueryClient();
+  const toastCenter = f7.toast.create({
+    text: '삭제되었습니다.',
+    position: 'center',
+    closeTimeout: 1000,
+  });
 
   return (
     <Page noToolbar={!is_main}>
@@ -40,6 +45,7 @@ const InterestIndexPage = ({ f7route }) => {
                       {
                         onSuccess: () => {
                           queryClient.invalidateQueries('interest');
+                          toastCenter.open();
                         },
                       },
                     )
