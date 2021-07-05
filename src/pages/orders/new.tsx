@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getCarts, createOrder } from '@api';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { f7, Navbar, Page, List, ListInput, Button } from 'framework7-react';
 import { useQuery, useQueryClient } from 'react-query';
 import useAuth from '@hooks/useAuth';
+import useUser from '@hooks/useUser';
 import * as Yup from 'yup';
 import { sleep } from '@utils';
 import LandingPage from '@pages/landing';
+import DaumPostcode from 'react-daum-postcode';
 
 interface ReceiverInfo {
   receiver_zipcode: string;
@@ -14,13 +16,6 @@ interface ReceiverInfo {
   receiver_address_detail: string;
   receiver_name: string;
 }
-
-const initialValues: ReceiverInfo = {
-  receiver_zipcode: '',
-  receiver_address: '',
-  receiver_address_detail: '',
-  receiver_name: '',
-};
 
 const OrderCreateSchema = Yup.object().shape({
   receiver_name: Yup.string().required('필수 입력사항 입니다.'),
@@ -30,17 +25,46 @@ const OrderCreateSchema = Yup.object().shape({
 });
 
 const OrderNewPage = ({ f7route, f7router }) => {
+  const { currentUserInfo } = useUser();
   const { currentUser } = useAuth();
   const userId: number = currentUser.id;
   const { data, status, error, refetch } = useQuery<any>('carts', getCarts());
   const queryClient = useQueryClient();
+  const [isAddress, setIsAddress] = useState('');
+  const [isZoneCode, setIsZoneCode] = useState();
+  const [isPostOpen, setIsPostOpen] = useState(false);
+  const initialValues: ReceiverInfo = {
+    receiver_zipcode: isZoneCode,
+    receiver_address: isAddress,
+    receiver_address_detail: '',
+    receiver_name: currentUserInfo.name,
+  };
+
+  const handleComplete = (data) => {
+    let fullAddress = data.address;
+    let extraAddress = '';
+
+    if (data.addressType === 'R') {
+      if (data.bname !== '') {
+        extraAddress += data.bname;
+      }
+      if (data.buildingName !== '') {
+        extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
+      }
+      fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
+    }
+    setIsZoneCode(data.zonecode);
+    setIsAddress(fullAddress);
+    setIsPostOpen(false);
+  };
   return (
     <Page noToolbar>
       <Navbar title="주문서 작성하기" backLink />
 
       {status === 'loading' && <LandingPage />}
       {status === 'error' && <div>{error}</div>}
-      {data && (
+      {isPostOpen ? <DaumPostcode height={620} onComplete={handleComplete} /> : null}
+      {data && !isPostOpen ? (
         <Formik
           initialValues={initialValues}
           validationSchema={OrderCreateSchema}
@@ -64,11 +88,11 @@ const OrderNewPage = ({ f7route, f7router }) => {
                   direct: f7route.query.item_id > 0,
                 });
               } else {
-                f7.dialog.alert('선택된 상품이 없습니다. 처음부터 다시 이용해주세요.');
                 f7router.back();
               }
-              await queryClient.removeQueries('carts');
-              await refetch();
+              if (!f7route.query.item_id) {
+                await queryClient.invalidateQueries('carts');
+              }
             } catch (e) {
               throw new Error(e);
             } finally {
@@ -80,7 +104,7 @@ const OrderNewPage = ({ f7route, f7router }) => {
               setSubmitting(false);
               f7.dialog.close();
               toastCenter.open();
-              f7router.navigate(`/`);
+              f7router.back();
             }
           }}
           validateOnMount
@@ -104,9 +128,10 @@ const OrderNewPage = ({ f7route, f7router }) => {
                   name="receiver_address"
                   placeholder="배송지 주소를 입력해주세요."
                   clearButton
-                  value={values.receiver_address}
+                  value={isAddress}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  onFocus={() => setIsPostOpen(true)}
                 />
                 <ListInput
                   label="상세주소"
@@ -124,7 +149,7 @@ const OrderNewPage = ({ f7route, f7router }) => {
                   name="receiver_zipcode"
                   placeholder="우편번호를 입력해주세요."
                   clearButton
-                  value={values.receiver_zipcode}
+                  value={isZoneCode}
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
@@ -135,7 +160,7 @@ const OrderNewPage = ({ f7route, f7router }) => {
             </Form>
           )}
         </Formik>
-      )}
+      ) : null}
     </Page>
   );
 };
