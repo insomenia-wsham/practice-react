@@ -1,6 +1,5 @@
 import NotFoundPage from '@pages/404';
 import HomePage from '@pages/home';
-import IntroPage from '@pages/intro';
 import ItemIndexPage from '@pages/items';
 import ItemShowPage from '@pages/items/show';
 import PostIndexPage from '@pages/posts/index';

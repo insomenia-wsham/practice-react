@@ -18,7 +18,7 @@ const CategoryIndexPage = ({ f7route }) => {
       <Navbar title="카테고리" backLink={!is_main} />
       <List medial-list>
         {categories.map((category, i) => (
-          <ListItem key={i} title={category.title} subtitle="Beatles" link={`/items?category_id=${category.id}`}>
+          <ListItem key={i} title={category.title} link={`/items?category_id=${category.id}`}>
             <img slot="media" src={API_URL + category.image_path} width="44" />
           </ListItem>
         ))}

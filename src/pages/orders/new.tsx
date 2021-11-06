@@ -57,6 +57,19 @@ const OrderNewPage = ({ f7route, f7router }) => {
     setIsAddress(fullAddress);
     setIsPostOpen(false);
   };
+
+  const order_details_attributes = (carts) => {
+    const items = [];
+    carts.map((cart) => {
+      items.push({
+        item_id: cart.item_id,
+        item_count: cart.item_count,
+        order_price: cart.item.sale_price,
+      });
+    });
+    return items;
+  };
+
   return (
     <Page noToolbar>
       <Navbar title="주문서 작성하기" backLink />
@@ -76,15 +89,15 @@ const OrderNewPage = ({ f7route, f7router }) => {
                 await createOrder({
                   ...values,
                   user_id: userId,
-                  item_list: f7route.query.item_id
+                  order_details_attributes: f7route.query.item_id
                     ? [
                         {
                           item_id: f7route.query.item_id,
                           item_count: f7route.query.item_count,
-                          item: { sale_price: f7route.query.sale_price },
+                          order_price: f7route.query.sale_price,
                         },
                       ]
-                    : data.carts,
+                    : order_details_attributes(data.carts),
                   direct: f7route.query.item_id > 0,
                 });
               } else {

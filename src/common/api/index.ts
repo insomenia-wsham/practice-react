@@ -115,7 +115,7 @@ export const getOrders = () => async () => {
 };
 
 // 주문 등록
-export const createOrder = async (params: CreateOrder) => {
+export const createOrder = async (params: any) => {
   const { data } = await API.post<{ message: string }>(`/orders`, { order: params });
   return data;
 };
